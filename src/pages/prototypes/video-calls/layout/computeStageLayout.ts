@@ -76,7 +76,15 @@ export type LayoutParticipant = Pick<
 export const OVERFLOW_CELL = '__overflow__';
 
 export const DEFAULT_MAX_VISIBLE = MAX_PARTICIPANTS;
-export const DEFAULT_MAX_FILMSTRIP = 6;
+/**
+ * Everyone is in the share filmstrip; the stage shows it a page at a time (the
+ * viewer pages through the rest). Tiles per page: the speaker views keep the
+ * small strip (Speaker across the top, Speaker with side strip down the side);
+ * Grid shows larger tiles, so fewer per page.
+ */
+export const SHARE_PAGE_SIZE = 6;
+export const SHARE_PAGE_SIZE_GRID = 2;
+export const DEFAULT_MAX_FILMSTRIP = MAX_PARTICIPANTS;
 /** Speaker strip cells (incl. chip) — default fits everyone at 10 people. */
 export const DEFAULT_MAX_STRIP = MAX_PARTICIPANTS - 1;
 /** Speaker strip cells per row before it wraps to two rows. */
@@ -97,7 +105,10 @@ export interface StageLayoutInput {
   pinnedId?: string | null;
   /** Max cells in a grid including self and the overflow chip. Default 10. */
   maxVisible?: number;
-  /** Max cells in the share filmstrip including the overflow chip. Default 6. */
+  /**
+   * Max cells in the share filmstrip including the overflow chip. Default:
+   * everyone (the stage pages the filmstrip, so there is no chip).
+   */
   maxFilmstrip?: number;
   /** Max cells in the speaker strip including the overflow chip. Default 9. */
   maxStrip?: number;
@@ -146,6 +157,8 @@ export interface SpeakerLayout {
 
 export interface ShareLayout {
   kind: 'share';
+  /** The view the viewer chose; Grid shows larger, fewer filmstrip tiles. */
+  view: StageView;
   presenterId: string;
   /** Camera tiles beside the shared content (includes presenter and self). */
   filmstripIds: string[];
@@ -356,6 +369,7 @@ export function computeStageLayout(input: StageLayoutInput): StageLayout {
     );
     return {
       kind: 'share',
+      view: input.view,
       presenterId,
       filmstripIds: prev.length ? visible : sortByOrder(visible, order),
       overflowIds: overflow,

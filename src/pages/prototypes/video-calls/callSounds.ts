@@ -37,7 +37,11 @@ const SOUND_MAP: Partial<Record<CallSoundName, SoundDef>> = {
   leave: { url: leaveUrl },
 };
 
+/** Longest a sound waits for the audio output switch before it plays anyway. */
+const SINK_SWITCH_LIMIT_MS = 500;
+
 let enabled = false;
+let outputDeviceId: string | undefined;
 const playing = new Map<CallSoundName, HTMLAudioElement>();
 
 function release(name: CallSoundName) {
@@ -78,16 +82,47 @@ export function playSound(
       release(name);
     }
   };
-  try {
-    el.play().catch(() => {
-      // Autoplay blocked or aborted: fail silently.
-      if (playing.get(name) === el) {
-        release(name);
-      }
-    });
-  } catch {
-    release(name);
+  const start = () => {
+    try {
+      el.play().catch(() => {
+        // Autoplay blocked or aborted: fail silently.
+        if (playing.get(name) === el) {
+          release(name);
+        }
+      });
+    } catch {
+      release(name);
+    }
+  };
+  // Play on the output chosen in the call's settings. Inert when none is chosen
+  // or the browser has no `setSinkId`; an unknown id keeps the default output.
+  // The switch is asynchronous, so playback starts once it has settled (and only
+  // if this sound is still the one that should play).
+  const sinkable = el as HTMLAudioElement & {
+    setSinkId?: (sinkId: string) => Promise<void>;
+  };
+  if (outputDeviceId && sinkable.setSinkId) {
+    // Never wait for the switch for long (a permission prompt or a stalled
+    // device can leave it pending): after the limit the sound plays on whatever
+    // output it has.
+    const switched = Promise.race([
+      sinkable.setSinkId(outputDeviceId),
+      new Promise<void>((resolve) =>
+        window.setTimeout(resolve, SINK_SWITCH_LIMIT_MS),
+      ),
+    ]);
+    switched
+      .catch(() => {
+        // Unsupported or missing device: keep the default output.
+      })
+      .then(() => {
+        if (enabled && playing.get(name) === el) {
+          start();
+        }
+      });
+    return;
   }
+  start();
 }
 
 export function setSoundsEnabled(value: boolean): void {
@@ -95,6 +130,11 @@ export function setSoundsEnabled(value: boolean): void {
   if (!value) {
     stopSound();
   }
+}
+
+/** The audio output (a `speakerDeviceId`) call sounds play on; `undefined` = default. */
+export function setSoundOutputDevice(deviceId: string | undefined): void {
+  outputDeviceId = deviceId;
 }
 
 export function isSoundsEnabled(): boolean {
