@@ -62,14 +62,36 @@ Prefer Compass CSS variables from `@mattermost/compass-ui/styles` (`--spacing-*`
 
 Never put absolute local paths (a home directory, `~/.claude/...`, session memory files) in committed files. Link to repo-relative paths or public URLs; if the target isn't in the repo, use inline prose instead.
 
+## Responding to review bots (CodeRabbit, Bugbot)
+
+Before fixing any finding, verify it against the code: read the callee, check whether the behavior is already handled, and confirm the PR's diff introduces or worsens it.
+
+- Fix a Critical or Major finding once you have confirmed it is real. If it is wrong, or the diff neither introduces nor worsens it, reply with the reason instead. Don't dismiss a finding only because the underlying failure predates the PR: if the diff makes it worse, it counts.
+- Fix a Minor finding only if it is a defect someone would hit: wrong behavior, a security or privacy gap, data loss, a crash or hang, a realistic race, a flaky or falsely passing test, a docs command that fails, a wrong fact, or a control unusable by keyboard or screen reader.
+- For any other Minor finding (wording, typos, qualifying accurate text, extra assertions, defensive checks for inputs that won't occur, refactors), do not change code. Reply once: "Skipping: nit, no user impact."
+- Batch all review fixes into one commit per review round.
+- Never argue with the bot to create a learning; leave design disagreements for a human.
+
+CodeRabbit commands, posted as a PR comment:
+
+| Situation                                             | Command                                                                       |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------- |
+| A notice says "Reviews paused"                        | `@coderabbitai resume`                                                        |
+| New commits, not paused, no review after 20 minutes   | `@coderabbitai review`                                                        |
+| Findings fixed, but CodeRabbit still requests changes | `@coderabbitai resolve`                                                       |
+| A rate-limit notice                                   | `@coderabbitai rate limit`, then `@coderabbitai review` once capacity returns |
+
+Use `@coderabbitai review` only for new commits it has not reviewed.
+
 ## Area-specific guidance
 
 - [src/pages/prototypes/AGENTS.md](src/pages/prototypes/AGENTS.md) — Prototypes
 - [src/pages/prototypes/AGENTS.md#prototype-docs](src/pages/prototypes/AGENTS.md#prototype-docs) — Per-prototype `docs/` (requirements, PRFAQ, specs); read first
 - [docs/COMPASS-REPO-SPLIT.md](docs/COMPASS-REPO-SPLIT.md) — Split plan
 - [.agents/skills/scaffold-prototype/SKILL.md](.agents/skills/scaffold-prototype/SKILL.md) — Scaffolding a multi-scene prototype
-- [compass-build](https://github.com/mattermost/compass-design/blob/main/skills/compass-toolkit/skills/compass-build/SKILL.md) — Compass rules for prototype scene UI (local path `.agents/skills/compass-build/SKILL.md`)
-- [compass-review](https://github.com/mattermost/compass-design/blob/main/skills/compass-toolkit/skills/compass-review/SKILL.md) — Read-only Compass audit of that UI (local path `.agents/skills/compass-review/SKILL.md`)
+- [compass-build](https://github.com/mattermost/compass-design/blob/main/skills/compass-toolkit/skills/compass-build/SKILL.md) — Compass rules for prototype scene UI
+- [compass-review](https://github.com/mattermost/compass-design/blob/main/skills/compass-toolkit/skills/compass-review/SKILL.md) — Read-only Compass audit of that UI
+- `compass-build` and `compass-review` come from the `mattermost-compass-toolkit` plugin ([install steps](https://github.com/mattermost/compass-design/blob/main/skills/compass-toolkit/README.md)). This repo also symlinks them into `.agents/skills/` from the sibling `../compass-design` checkout (see [.cursor/cursor.md](.cursor/cursor.md)). The Cursor Cloud install hook clones that sibling, so cloud agents get the skills with no extra setup. Locally the symlinks dangle until you clone `compass-design` next to this repo ([README setup](README.md)), or you can install the plugin instead. With both present the symlinks are redundant but harmless.
 - [.agents/skills/guided-walkthrough/SKILL.md](.agents/skills/guided-walkthrough/SKILL.md) — Guided walkthrough mode for a prototype
 - [.cursor/rules/creating-agent-rules.mdc](.cursor/rules/creating-agent-rules.mdc) — Adding or changing agent guidance
 - [.cursor/cursor.md](.cursor/cursor.md) — Cursor Cloud Agents: sibling compass-design setup, running the playground, screenshots, verification (environment in [.cursor/README.md](.cursor/README.md)). Cloud Agents read it before running the playground, taking screenshots, or verifying changes, including prototype-only work.
