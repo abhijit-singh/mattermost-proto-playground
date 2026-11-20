@@ -1,0 +1,18 @@
+# Risk flags -> score -> who must approve the playground PR.
+# The frame stage lists the flags it finds in stages.frame.risk_flags; handoff.md copies
+# the final list; check.mjs recomputes the score and fails if approval_required disagrees.
+# Written as data so CODEOWNERS and labels can enforce it later.
+flags:
+  new_component_request: 2 # a Compass gap that becomes a request to compass-design
+  new_pattern: 2 # an interaction model with no Compass guideline or shipped precedent
+  touches_global_chrome: 2 # sidebar, global header, composer, channel header
+  permissions_or_security_copy: 2 # anything that explains who can see or do what
+  destructive_action: 1 # delete, remove, revoke, leave, irreversible changes
+  admin_console: 1
+  mobile: 1
+  copy_only: 0
+rules:
+  - if: score >= 2
+    approval_required: designer
+  - else: true
+    approval_required: pm-or-eng
