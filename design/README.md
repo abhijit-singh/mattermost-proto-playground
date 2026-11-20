@@ -89,8 +89,6 @@ npm run design:emit -- <slug>                       # PR body, source comment, S
 
 **Options rules** (`loop.mjs merge-critique-options`): an option is eligible when no line is below 3, lines 1 and 6 are 4 or more, and the mean is 4 or more. The set passes when one or more options are eligible; the rest are recorded as considered. The critics' majority pick is the preferred option. If it is eligible, it is recommended. If it is not eligible but passes lines 1 and 6, it gets one refine round, and the eligible options are kept as the fallback. When none is eligible: after round 1, the critics' `send_back_to` (one back-edge to research, one shared back-edge to frame). After the last explore round (round 2, or 3 after a late back-edge), an unused back-edge the critics vote for is taken once, because a refine cannot fix a research gap or a wrong problem; otherwise a refine round on the best option that passes lines 1 and 6, else escalate. The after-flow is evidence for lines 1 and 2, not a scoring rule; `design:check` requires one per option. A refine round runs once per run and is always the last options round; if it fails with no fallback, the run escalates.
 
-**Calibration.** The first 5 runs set `calibration: true`; a designer scores every line blind in `calibration.md` before the critic runs. `next.mjs` waits for the designer's row for the current round before it schedules critique (persona can run meanwhile), and `design:check` compares the timestamps. A line the critic gets wrong on 2 of 5 runs goes advisory until its anchor is fixed.
-
 **Risk and approval** (`risk.yaml`): flags sum to a score; 2 or more needs a designer, otherwise PM or engineer may self-approve. `design:check` recomputes it from `handoff.md`.
 
 ## Files
@@ -101,7 +99,6 @@ design/rubric.md            prototype critique rubric (anchors, must-pass) · sc
 design/rubric-options.md    options critique rubric
 design/follow-ups.md        open items no one has confirmed yet
 design/risk.yaml            risk flags → score → approver
-design/calibration.md       run counter, designer blind scores, advisory lines
 design/personas/            FY26 persona catalog and profiles, verbatim
 design/templates/           request.yaml, frame.md, research.md, options.md, critique-options.md, critique.md, persona.md, verify.md, state-matrix.yaml, copy.yaml, handoff.md, design-note.md
 design/<slug>/              one packet per effort: request.yaml, source.json, log.md, stage artifacts, rounds/, emit/
@@ -119,7 +116,6 @@ scripts/design/             lib, triage(+rules), size.rules, models, agents, req
 - Run a critique, a persona, or a verify in the context that built the prototype, or let any of them read another's output.
 - Pass a build round while a persona `blocker` is open or a must-pass rubric line is below 4.
 - Let verify iterate past one repair.
-- Read `critique.md` before the designer's blind scores are recorded on a calibration run.
 - Present persona findings as customer evidence. They are synthetic and labeled so.
 - Skip triage because the request "obviously" needs design. The record of the decision is the point.
 - Continue past `rounds_max` or past a plateau.

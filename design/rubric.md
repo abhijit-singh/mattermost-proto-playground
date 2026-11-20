@@ -17,7 +17,7 @@ Fixed. Ten lines, each scored 1–5 with evidence (a scene id or `file:line`). E
 
 ## Pass
 
-No line below 3, every must-pass line at 4 or more, mean at or above 4. A line marked `advisory` in `design/calibration.md` is reported but cannot block.
+No line below 3, every must-pass line at 4 or more, mean at or above 4.
 
 ## Scoring protocol
 
@@ -25,7 +25,6 @@ No line below 3, every must-pass line at 4 or more, mean at or above 4. A line m
 - **Median of 3.** When the first sample meets the threshold, two more samples run in two more fresh contexts and the median per line is the score (`scripts/design/loop.mjs merge-critique` refuses to pass a round on one sample). A round that fails on the first sample uses that sample; a failure needs no confirmation.
 - **Regression.** A build round that turns a passing line into a failing line is reverted to the previous round's prototype and the fix is re-issued with the regression named. The round still counts.
 - **Plateau.** Two consecutive rounds with no rubric line improving and no fewer persona blockers escalate to a human.
-- **Calibration.** On the first 5 runs a designer scores every line blind in `design/calibration.md` before reading `critique.md`. A line that differs by more than 1 point on 2 or more of the 5 runs goes `advisory` until its anchor is rewritten and 3 further runs agree. A must-pass line marked advisory means a designer reviews that line on every run until it is restored.
 
 ## Output format (one sample)
 

@@ -26,8 +26,7 @@ Open items found while building the pass. Each one is something no one has confi
 | # | Item | Status |
 |---|---|---|
 | P2 | Rubric resources to keep learning from (a golden set from old specs, PRs and design review comments) | To discuss |
-| P3 | Re-score the 9 critique and 3 verify samples from `shared-with-panel` on the mid class and compare with the recorded scores; any line that drifts by more than 1 point needs its anchor fixed or stays on frontier | Later; must run before calibration run 1 |
-| P4 | Calibration run 1, with the judge models fixed | Later, after P3 |
+| P3 | Re-score the 9 critique and 3 verify samples from `shared-with-panel` on the mid class and compare with the recorded scores; any line that drifts by more than 1 point needs its anchor fixed or stays on frontier | Later |
 | P5 | Cursor model ids for `DESIGN_PASS_MODEL_FRONTIER`, `_MID`, `_FAST` and `_VERIFY` (a different family from build's) | Each runner sets them locally |
 
 ## Decided
