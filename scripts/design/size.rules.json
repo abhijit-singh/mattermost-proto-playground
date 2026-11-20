@@ -1,0 +1,21 @@
+{
+  "tweakRoundsMax": 2,
+  "smallRoundsMax": 4,
+  "largeRoundsMax": 10,
+  "unknownSignals": ["novelty", "interaction_depth", "prior_art"],
+  "large": [
+    "multi-step",
+    "mobile parity",
+    "new flow",
+    "several screens",
+    "multiple screens"
+  ],
+  "small": [
+    "copy change",
+    "visual bug",
+    "existing panel",
+    "single screen",
+    "one scene",
+    "setting"
+  ]
+}

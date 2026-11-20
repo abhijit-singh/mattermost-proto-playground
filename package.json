@@ -16,7 +16,13 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "design:triage": "node scripts/design/triage.mjs",
+    "design:request": "node scripts/design/request.mjs",
+    "design:next": "node scripts/design/next.mjs",
+    "design:check": "node scripts/design/check.mjs",
+    "design:emit": "node scripts/design/emit.mjs",
+    "design:sync-skills": "node scripts/design/sync-skills.mjs"
   },
   "dependencies": {
     "@fontsource/metropolis": "^5.2.5",

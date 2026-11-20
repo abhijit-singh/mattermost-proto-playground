@@ -1,0 +1,36 @@
+{
+  "prototype": {
+    "source": "design/rubric.md",
+    "pass": { "minLine": 3, "mustPassMin": 4, "meanMin": 4 },
+    "lines": [
+      { "id": 1, "name": "Outcome fit", "must_pass": true },
+      { "id": 2, "name": "Grounded in shipped behavior", "must_pass": false },
+      { "id": 3, "name": "Compass fidelity", "must_pass": false },
+      { "id": 4, "name": "State coverage", "must_pass": false },
+      { "id": 5, "name": "Accessibility", "must_pass": false },
+      { "id": 6, "name": "Copy", "must_pass": false },
+      { "id": 7, "name": "Mobile and density", "must_pass": false },
+      { "id": 8, "name": "Cognitive load", "must_pass": false },
+      { "id": 9, "name": "Direction fit", "must_pass": true },
+      { "id": 10, "name": "Trust and safety", "must_pass": "risk>=2" }
+    ]
+  },
+  "options": {
+    "source": "design/rubric-options.md",
+    "eligible": {
+      "minLine": 3,
+      "mustPass": [1, 6],
+      "mustPassMin": 4,
+      "meanMin": 4
+    },
+    "lines": [
+      { "id": 1, "name": "Answers the frame", "must_pass": true },
+      { "id": 2, "name": "Distinct", "must_pass": false },
+      { "id": 3, "name": "Grounded", "must_pass": false },
+      { "id": 4, "name": "Tests the assumptions", "must_pass": false },
+      { "id": 5, "name": "Compass fit on paper", "must_pass": false },
+      { "id": 6, "name": "Direction", "must_pass": true },
+      { "id": 7, "name": "Feasibility", "must_pass": false }
+    ]
+  }
+}

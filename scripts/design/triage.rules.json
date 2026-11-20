@@ -1,0 +1,81 @@
+{
+  "tierOrder": ["prototype", "explore", "tweak", "skip"],
+  "aliases": {
+    "none": "skip",
+    "note": "tweak",
+    "full": "prototype"
+  },
+  "uiSurface": [
+    "screen",
+    "page",
+    "modal",
+    "dialog",
+    "panel",
+    "banner",
+    "sidebar",
+    "header",
+    "composer",
+    "form",
+    "sheet",
+    "popover",
+    "menu",
+    "button",
+    "channel",
+    "prototype",
+    "ui"
+  ],
+  "tiers": {
+    "prototype": {
+      "phrases": [
+        "new screen",
+        "new route",
+        "new flow",
+        "new surface",
+        "multi-step",
+        "mobile parity"
+      ],
+      "seedAsk": ["prototype"]
+    },
+    "explore": {
+      "phrases": ["how should we", "which direction", "direction question"],
+      "seedAsk": ["explore"]
+    },
+    "tweak": {
+      "phrases": [
+        "existing screen",
+        "existing panel",
+        "visual bug",
+        "component swap",
+        "copy change",
+        "setting"
+      ]
+    },
+    "skip": {
+      "phrases": [
+        "no ui",
+        "server only",
+        "api only",
+        "data path",
+        "migration",
+        "infrastructure",
+        "infra"
+      ]
+    }
+  },
+  "compliance": [
+    "permissions",
+    "roles",
+    "role",
+    "abac",
+    "classification",
+    "labels",
+    "encryption",
+    "audit",
+    "retention",
+    "export",
+    "cross-domain",
+    "identity",
+    "policy",
+    "guest"
+  ]
+}

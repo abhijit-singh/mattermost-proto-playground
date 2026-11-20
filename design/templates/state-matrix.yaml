@@ -1,0 +1,17 @@
+states:
+  - id: loading
+    required: true
+    scene: null
+    na_reason: null
+  - id: empty
+    required: true
+    scene: null
+    na_reason: null
+  - id: error
+    required: true
+    scene: null
+    na_reason: null
+  - id: success
+    required: true
+    scene: null
+    na_reason: null

@@ -1,0 +1,15 @@
+{
+  "note": "Names are the ones Abhijit used. This file has no Cursor model slug. Copy a picker id into the shell as DESIGN_PASS_MODEL_FRONTIER, DESIGN_PASS_MODEL_MID, or DESIGN_PASS_MODEL_FAST. Do not commit that id.",
+  "stages": {
+    "frame": { "class": "frontier", "name": "Grok 4.7 High" },
+    "explore": { "class": "frontier", "name": "Grok 4.7 High" },
+    "build": { "class": "frontier", "name": "Grok 4.7 High" },
+    "research": { "class": "mid", "name": "Sonnet 5.5" },
+    "critique-options": { "class": "mid", "name": "Sonnet 5.5" },
+    "critique": { "class": "mid", "name": "Sonnet 5.5" },
+    "persona": { "class": "mid", "name": "Sonnet 5.5" },
+    "verify": { "class": "mid", "name": "Sonnet 5.5" },
+    "handoff": { "class": "mid", "name": "Sonnet 5.5" },
+    "lookup": { "class": "fast", "name": "Sonnet 5.5" }
+  }
+}

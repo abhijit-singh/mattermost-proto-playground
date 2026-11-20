@@ -1,0 +1,72 @@
+# Control file for one effort. Intake writes design/<slug>/request.yaml.
+# Do not put a Cursor model slug or a secret in this file.
+slug: null
+title: null
+source_kind: null
+source_ref: null
+source_fetch: null
+tier: null
+size: null
+rounds_max: null
+compliance: false
+mode: autopilot
+rules_fired: []
+size_signals:
+  novelty: unknown
+  interaction_depth: unknown
+  prior_art: unknown
+prototype: null
+risk_flags: []
+risk_score: 0
+approval_required: pm-or-eng
+outcome_headline: null
+users: null
+customer_words: null
+decider: null
+lighthouse_name: null
+verified: null
+needs_confirmation: []
+stage_frame: pending
+stage_research: pending
+stage_explore: pending
+stage_critique_options: pending
+stage_build: pending
+stage_critique: pending
+stage_persona: pending
+stage_verify: pending
+stage_handoff: pending
+stage_check: pending
+frame_invalidations: 0
+research_invalidates_frame: false
+research_invalidation_applied: false
+options_round: 0
+options_phase: explore
+options_decision: null
+options_applied: false
+refine_used: false
+refine_option: null
+back_edge_research: false
+back_edge_frame: false
+late_back_edge: false
+recommended_option: null
+chosen_option: null
+chosen_by: null
+eligible_options: []
+fallback_options: []
+explorer_pick: null
+build_round: 0
+verify_round: 0
+verify_repairs: 0
+verify_repair_open: false
+last_verdict: null
+last_scores: {}
+previous_scores: {}
+previous_blockers: null
+regression_pending: false
+check_ok: false
+check_ran: false
+stop: null
+stop_reason: null
+prs: 0
+started_at: null
+budget_minutes: 90
