@@ -333,16 +333,11 @@ export function stageModel(stage) {
   if (!found) {
     throw new Error(`No model class for stage ${stage}`);
   }
-  const envSpecific =
-    process.env[`DESIGN_PASS_MODEL_${stage.toUpperCase().replace(/-/g, '_')}`];
-  const envClass =
-    process.env[`DESIGN_PASS_MODEL_${found.class.toUpperCase()}`];
   return {
     stage,
     agent: `design-pass-${stage}`,
     class: found.class,
     name: found.name,
-    modelId: envSpecific || envClass || null,
   };
 }
 
@@ -370,14 +365,50 @@ export function listFiles(dir, predicate) {
   return out;
 }
 
+const PERSONA_INDEX = new Set(['readme.md', 'persona-catalog.md']);
+
 export function personaProfiles() {
   const dir = path.join(designRoot, 'personas');
   return listFiles(
     dir,
     (file) =>
-      /\.(md|ya?ml)$/.test(file) &&
-      path.basename(file).toLowerCase() !== 'readme.md',
+      /\.md$/i.test(file) &&
+      !PERSONA_INDEX.has(path.basename(file).toLowerCase()),
   );
+}
+
+export function selectPersonas(limit = 2) {
+  const profiles = personaProfiles();
+  const byName = new Map(
+    profiles.map((file) => [path.basename(file, path.extname(file)), file]),
+  );
+  const chosen = [];
+  const catalog = path.join(designRoot, 'personas', 'persona-catalog.md');
+  if (fs.existsSync(catalog)) {
+    const text = readText(catalog);
+    const panel = text.match(/\*\*missionops\*\*[^\n]*/);
+    const slugs = panel
+      ? [...panel[0].matchAll(/`([a-z0-9-]+)`/g)].map((match) => match[1])
+      : [];
+    for (const slug of slugs) {
+      if (chosen.length >= limit) {
+        break;
+      }
+      const row = text.match(new RegExp(`\\| \`${slug}\` \\| ([^|]+) \\|`));
+      const name = row ? row[1].trim() : null;
+      const file = name ? byName.get(name) : null;
+      if (file) {
+        chosen.push({ slug, name, file });
+      }
+    }
+  }
+  if (!chosen.length) {
+    for (const file of profiles.slice(0, limit)) {
+      const name = path.basename(file, path.extname(file));
+      chosen.push({ slug: kebab(name), name, file });
+    }
+  }
+  return chosen.slice(0, limit);
 }
 
 export function mean(numbers) {

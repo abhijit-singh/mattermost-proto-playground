@@ -29,14 +29,19 @@ const compassBuild =
 const compassReview =
   '../compass-design/skills/compass-toolkit/skills/compass-review/SKILL.md';
 
+function modelInstruction(stage) {
+  const name = loadModels().stages[stage].name;
+  return `This stage runs on ${name}. The orchestrator is the cloud agent's selected model, which is the default frontier model. Do not ask anyone to paste a model id, and do not invent a Cursor model slug.`;
+}
+
 function common(stage) {
   return `Read \`design/README.md\` and the packet \`design/<slug>/\` before you write. \`<slug>\` is the slug \`next.mjs\` printed.
+
+${modelInstruction(stage)}
 
 Write only inside this repo, under \`design/<slug>/\` and, for a build, \`src/pages/prototypes/\`. Never write to \`mattermost/mattermost\` or \`internal-product-knowledge\`. Never post a pull request, a source comment, or a Seed.
 
 Do not run \`compass-migrate\`. Do not run \`prototype-to-production\`.
-
-Do not invent a Cursor model slug. The model name is in the header above. The parent passes the picker id for that name. \`model: inherit\` is set because this branch does not record a slug.
 
 Record this stage with \`node scripts/design/stage.mjs <slug> start ${stage}\` and \`complete ${stage}\`. Do not edit another stage's block.
 
@@ -95,7 +100,7 @@ The script takes the median. A failing first sample is not confirmed by more sam
 
 Read \`node scripts/design/brief.mjs <slug> persona <persona>\` and that one profile under \`design/personas/\`. Attempt the primary task. Write \`design/<slug>/rounds/<n>/persona.<persona>.md\` with \`completed: true\` or \`completed: false\`, and \`blocker: true\` or \`blocker: false\`.
 
-This finding is synthetic. Do not present it as customer evidence. Do not read a critique sample. If \`design/personas/\` has no profile, stop. Do not invent a persona.`,
+This finding is synthetic. Do not present it as customer evidence. Do not read a critique sample. The critique step picks that profile from the FY26 catalog. Do not invent a persona.`,
   verify: `${common('verify')}
 
 You are one fresh judge. Read \`node scripts/design/brief.mjs <slug> verify\`, \`design/rubric.md\`, the final prototype, and the \`design:check\` output. Read \`${compassReview}\`. That audit does not replace the rubric or \`design:check\`.
@@ -121,7 +126,7 @@ Do not run \`compass-migrate\` or \`prototype-to-production\`.`,
 
 Answer the parent's question from this repo. You may read \`../compass-design\` and \`../mattermost\` when they are present. You may not write to either, and you may not write to \`internal-product-knowledge\`. If a sibling is missing, say it was not searched.
 
-Do not run \`compass-migrate\` or \`prototype-to-production\`. Do not invent a Cursor model slug. The model name is in the header. The parent passes the picker id for that name.`,
+Do not run \`compass-migrate\` or \`prototype-to-production\`. ${modelInstruction('lookup')}`,
 };
 
 export function renderAgent(stage) {

@@ -28,12 +28,12 @@ Four clones side by side, plus the persona catalog: `../compass-design`, `../mat
 
 Triage is deterministic (`scripts/design/triage.rules.json`; no LLM) and prints the rules that fired.
 
-| Tier | Fires when | Produces |
-|---|---|---|
-| `skip` | no UI surface named; server, infra, API or data paths only | `design/<slug>/decision.md` recording why |
-| `tweak` | an existing screen only: copy, a setting in an existing panel, a component swap, a visual bug; no new route | `frame.md`, `design-note.md`; plus a prototype with as many scenes as the change touches when frame sets `prototype: scenes` |
-| `explore` | a Seed at `ask: explore`, or a direction question ("how should we…") | `frame.md`, `research.md`, `options.md`, `critique-options.md`; option sketches in `src/pages/prototypes/<slug>-options/` with a short walkthrough |
-| `prototype` | a new screen, route, flow or surface; multi-step; mobile parity; a Seed at `ask: prototype` with a usability or desirability assumption | the whole pass: prototype + walkthrough + `handoff.md` |
+| Tier        | Fires when                                                                                                                              | Produces                                                                                                                                           |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skip`      | no UI surface named; server, infra, API or data paths only                                                                              | `design/<slug>/decision.md` recording why                                                                                                          |
+| `tweak`     | an existing screen only: copy, a setting in an existing panel, a component swap, a visual bug; no new route                             | `frame.md`, `design-note.md`; plus a prototype with as many scenes as the change touches when frame sets `prototype: scenes`                       |
+| `explore`   | a Seed at `ask: explore`, or a direction question ("how should we…")                                                                    | `frame.md`, `research.md`, `options.md`, `critique-options.md`; option sketches in `src/pages/prototypes/<slug>-options/` with a short walkthrough |
+| `prototype` | a new screen, route, flow or surface; multi-step; mobile parity; a Seed at `ask: prototype` with a usability or desirability assumption | the whole pass: prototype + walkthrough + `handoff.md`                                                                                             |
 
 The old names `none`, `note` and `full` are still accepted by `--tier`, `design:<tier>` labels and older packets.
 
@@ -45,14 +45,14 @@ Tier sets the stages. **Size** (`small | large`, `scripts/design/size.rules.json
 
 **Models.** Every AI stage runs as its own subagent, `design-pass-<stage>`, defined in `.cursor/agents/` and `.claude/agents/`. Those files are generated from `scripts/design/models.json` by `npm run design:sync-skills`, and `design:check` fails when they drift.
 
-| Class | Stages | Why |
-|---|---|---|
-| frontier | frame, explore, build | Frame and explore set what every later stage works on. Build quality sets the number of rounds, and each round costs a build plus 2–5 judge calls. |
-| mid | research, critique-options, critique, persona, verify, handoff | Anything that can block or force a build round is at least mid. |
-| fast | `design-pass-lookup` | Read-only lookups for frame and research; decides nothing. |
-| none | intake, `next.mjs`, `loop.mjs` merges, check, emit | Scripts. |
+| Class    | Stages                                                         | Why                                                                                                                                                |
+| -------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| frontier | frame, explore, build                                          | Frame and explore set what every later stage works on. Build quality sets the number of rounds, and each round costs a build plus 2–5 judge calls. |
+| mid      | research, critique-options, critique, persona, verify, handoff | Anything that can block or force a build round is at least mid.                                                                                    |
+| fast     | `design-pass-lookup`                                           | Read-only lookups for frame and research; decides nothing.                                                                                         |
+| none     | intake, `next.mjs`, `loop.mjs` merges, check, emit             | Scripts.                                                                                                                                           |
 
-Claude Code reads the alias in the agent file (`opus`, `sonnet`, `haiku`). Cursor has no class aliases, so set `DESIGN_PASS_MODEL_FRONTIER`, `DESIGN_PASS_MODEL_MID` and `DESIGN_PASS_MODEL_FAST` to model ids in your shell, never in a committed file; `DESIGN_PASS_MODEL_<STAGE>` overrides one stage. `next.mjs` prints the subagent and its model on an `agent:` line, and the orchestrator logs the model each subagent ran on. Set `DESIGN_PASS_MODEL_VERIFY` to a model from a different family than build's; without it verify runs on the same family's mid model and the log says so. The chat that runs `/design-pass` only runs scripts and starts subagents, so it does not need a frontier model.
+The orchestrator is the cloud agent's selected model, which is the default frontier model. Each stage skill names the model that stage runs on: Grok 4.7 High for frame, explore, and build; Sonnet 5.5 for research, both critiques, persona, verify, handoff, and lookups. `next.mjs` prints that name on the `agent:` line. These are names, not Cursor model slugs, and the run does not ask for a model id.
 
 ## Run it
 
@@ -73,17 +73,17 @@ npm run design:emit -- <slug>                       # PR body, source comment, S
 
 ## Stages and contracts
 
-| Stage | Reads | Writes | Fresh context |
-|---|---|---|---|
-| frame | request, source, `../mattermost/webapp` code and `en.json`, installed Compass `.d.ts`, guidelines | `frame.md` (with the baseline map: base screens, entry points, current flow), `stages.frame` | no |
-| research | frame, Seeds and T3s, Figma found through links in Confluence, Jira, PRs and Seeds (read only), the last 2–3 releases on the surface, prototypes, Compass patterns, issues, external precedent, and control sources when compliance is on | `research.md`, `stages.research` | no |
-| explore | frame, research, `rubric-options.md` | `options.md` with an after-flow per option (+ sketches for `explore`), `stages.explore` | no |
-| critique-options | frame, research, `rubric-options.md`, options | `rounds/options-<n>/critique-options.sample-<k>.md` → merged `critique-options.md` | **yes, ×3** |
-| build | chosen option, previous `critique.md` fixes + `persona.md` blockers/frictions | prototype, `state-matrix.yaml`, `copy.yaml`, screenshots, `stages.build` | no |
-| critique | the brief (`brief.mjs <slug> critique`: scored frame and research sections, the chosen option's section of `options.md`), `rubric.md`, prototype, screenshots, state matrix | `rounds/<n>/critique.sample-<k>.md` → merged `critique.md` | **yes; ×3 on a passing sample** |
-| persona | the brief (`brief.mjs <slug> persona <persona>`: frame problem, outcome, users, assumptions), one profile, screenshots, state matrix, copy; source by lookup only | `rounds/<n>/persona.<slug>.md` → merged `persona.md` | **yes, one per persona** |
-| verify | the brief (`brief.mjs <slug> verify`), `rubric.md`, final prototype, `design:check` output | `rounds/verify-<a>/verify.sample-<k>.md` → merged `verify.md` | **yes, ×3** |
-| handoff | everything in the packet, the code | walkthrough, `handoff.md` or `design-note.md`, `stages.handoff` | no |
+| Stage            | Reads                                                                                                                                                                                                                                     | Writes                                                                                       | Fresh context                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------- |
+| frame            | request, source, `../mattermost/webapp` code and `en.json`, installed Compass `.d.ts`, guidelines                                                                                                                                         | `frame.md` (with the baseline map: base screens, entry points, current flow), `stages.frame` | no                              |
+| research         | frame, Seeds and T3s, Figma found through links in Confluence, Jira, PRs and Seeds (read only), the last 2–3 releases on the surface, prototypes, Compass patterns, issues, external precedent, and control sources when compliance is on | `research.md`, `stages.research`                                                             | no                              |
+| explore          | frame, research, `rubric-options.md`                                                                                                                                                                                                      | `options.md` with an after-flow per option (+ sketches for `explore`), `stages.explore`      | no                              |
+| critique-options | frame, research, `rubric-options.md`, options                                                                                                                                                                                             | `rounds/options-<n>/critique-options.sample-<k>.md` → merged `critique-options.md`           | **yes, ×3**                     |
+| build            | chosen option, previous `critique.md` fixes + `persona.md` blockers/frictions                                                                                                                                                             | prototype, `state-matrix.yaml`, `copy.yaml`, screenshots, `stages.build`                     | no                              |
+| critique         | the brief (`brief.mjs <slug> critique`: scored frame and research sections, the chosen option's section of `options.md`), `rubric.md`, prototype, screenshots, state matrix                                                               | `rounds/<n>/critique.sample-<k>.md` → merged `critique.md`                                   | **yes; ×3 on a passing sample** |
+| persona          | the brief (`brief.mjs <slug> persona <persona>`: frame problem, outcome, users, assumptions), one profile, screenshots, state matrix, copy; source by lookup only                                                                         | `rounds/<n>/persona.<slug>.md` → merged `persona.md`                                         | **yes, one per persona**        |
+| verify           | the brief (`brief.mjs <slug> verify`), `rubric.md`, final prototype, `design:check` output                                                                                                                                                | `rounds/verify-<a>/verify.sample-<k>.md` → merged `verify.md`                                | **yes, ×3**                     |
+| handoff          | everything in the packet, the code                                                                                                                                                                                                        | walkthrough, `handoff.md` or `design-note.md`, `stages.handoff`                              | no                              |
 
 **Loop rules** (`scripts/design/loop.mjs`, deterministic): a round passes when no rubric line is below 3, must-pass lines (1, 9, and 10 at risk ≥ 2) are 4 or more, the mean is 4 or more, no persona `blocker` is open and every persona completes the task. Otherwise iterate, up to `rounds_max`. Two consecutive rounds with no line improving and no fewer blockers is a plateau → escalate. A round that turns a passing line failing is a regression → revert, re-issue the fix, count the round. Verify gets one repair, then escalates. Counters never reset.
 
@@ -124,10 +124,10 @@ scripts/design/             lib, triage(+rules), size.rules, models, agents, req
 
 ## Later: the pipeline
 
-| Stage | Local now | Pipeline later |
-|---|---|---|
-| Triage | `npm run design:triage` | GitHub Action on issue label / Seed PR merge / PR opened; sets `design:*` label |
-| Delegate | `npm run design:request` | same action creates the branch and `request.yaml`, dispatches a cloud agent with the stage name |
+| Stage        | Local now                                                       | Pipeline later                                                                                                               |
+| ------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Triage       | `npm run design:triage`                                         | GitHub Action on issue label / Seed PR merge / PR opened; sets `design:*` label                                              |
+| Delegate     | `npm run design:request`                                        | same action creates the branch and `request.yaml`, dispatches a cloud agent with the stage name                              |
 | Agent stages | `/design-pass <slug>` starts the `design-pass-<stage>` subagent | the same agent headless; one stage per job, on the model `next.mjs --json` names (`model`); fresh contexts are separate jobs |
-| Guardrails | `npm run design:check` | required CI check on the playground PR; risk score sets reviewers via CODEOWNERS / labels |
-| Emit | `npm run design:emit` | the same drafts posted by the action; `design-complete` label triggers plan |
+| Guardrails   | `npm run design:check`                                          | required CI check on the playground PR; risk score sets reviewers via CODEOWNERS / labels                                    |
+| Emit         | `npm run design:emit`                                           | the same drafts posted by the action; `design-complete` label triggers plan                                                  |

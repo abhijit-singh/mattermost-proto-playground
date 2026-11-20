@@ -11,11 +11,11 @@ Model class: frontier
 
 Read `design/README.md` and the packet `design/<slug>/` before you write. `<slug>` is the slug `next.mjs` printed.
 
+This stage runs on Grok 4.7 High. The orchestrator is the cloud agent's selected model, which is the default frontier model. Do not ask anyone to paste a model id, and do not invent a Cursor model slug.
+
 Write only inside this repo, under `design/<slug>/` and, for a build, `src/pages/prototypes/`. Never write to `mattermost/mattermost` or `internal-product-knowledge`. Never post a pull request, a source comment, or a Seed.
 
 Do not run `compass-migrate`. Do not run `prototype-to-production`.
-
-Do not invent a Cursor model slug. The model name is in the header above. The parent passes the picker id for that name. `model: inherit` is set because this branch does not record a slug.
 
 Record this stage with `node scripts/design/stage.mjs <slug> start explore` and `complete explore`. Do not edit another stage's block.
 

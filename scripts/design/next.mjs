@@ -10,9 +10,9 @@ import {
   missingCritical,
   packetDir,
   parseScoreTable,
-  personaProfiles,
   saveRequest,
   scorePasses,
+  selectPersonas,
   stageModel,
 } from './lib.mjs';
 
@@ -30,7 +30,6 @@ function agentStep(stage, extra = {}) {
     next: stage,
     agent: model.agent,
     modelName: model.name,
-    modelId: model.modelId,
     modelClass: model.class,
     ...extra,
   };
@@ -189,26 +188,17 @@ function critiqueState(slug, request) {
   const dir = path.join(packetDir(slug), 'rounds', String(round));
   const critique = samples(dir, 'critique.sample-');
   const persona = samples(dir, 'persona.');
-  const profiles = personaProfiles();
-  if (!profiles.length) {
-    request.stop = 'escalate';
-    request.stop_reason =
-      'FY26 persona catalog is not on this branch (design/personas/).';
-    return stopStep('escalate', request.stop_reason);
-  }
-  const wanted = profiles
-    .slice(0, 2)
-    .map((file) => path.basename(file, path.extname(file)));
+  const wanted = selectPersonas(2);
   const missingPersonas = wanted.filter(
-    (name) => !persona.some((file) => file.includes(name)),
+    (profile) => !persona.some((file) => file === `persona.${profile.slug}.md`),
   );
   if (!critique.length || missingPersonas.length) {
     const steps = [];
     if (!critique.length) {
       steps.push(agentStep('critique', { sample: 1 }));
     }
-    for (const name of missingPersonas) {
-      steps.push(agentStep('persona', { persona: name }));
+    for (const profile of missingPersonas) {
+      steps.push(agentStep('persona', { persona: profile.slug }));
     }
     return { kind: 'parallel', next: 'critique', parallel: true, steps };
   }
@@ -376,10 +366,7 @@ function afterBuild(slug, request) {
       next: 'verify',
       parallel: true,
       steps,
-      note:
-        verifyName === buildName
-          ? 'Verify is on the same model name as build. Set DESIGN_PASS_MODEL_VERIFY to a different family.'
-          : `Verify model name ${verifyName} is a different family from build ${buildName}.`,
+      note: `Verify runs on ${verifyName}. Build runs on ${buildName}.`,
     };
   }
   const verifyMerged = path.join(packetDir(slug), 'verify.md');
@@ -545,21 +532,13 @@ function printStep(slug, step) {
       const sample = child.sample ? ` sample: ${child.sample}` : '';
       const persona = child.persona ? ` persona: ${child.persona}` : '';
       console.log(
-        `agent: ${child.agent} model: ${child.modelId || 'unset'} name: ${child.modelName}${sample}${persona}`,
+        `agent: ${child.agent} model: ${child.modelName}${sample}${persona}`,
       );
     }
   } else if (step.agent) {
-    console.log(
-      `agent: ${step.agent} model: ${step.modelId || 'unset'} name: ${step.modelName}`,
-    );
+    console.log(`agent: ${step.agent} model: ${step.modelName}`);
   }
-  const skip = new Set([
-    'steps',
-    'agent',
-    'modelName',
-    'modelId',
-    'modelClass',
-  ]);
+  const skip = new Set(['steps', 'agent', 'modelName', 'modelClass']);
   for (const [key, value] of Object.entries(step)) {
     if (skip.has(key) || value == null || value === false) {
       continue;

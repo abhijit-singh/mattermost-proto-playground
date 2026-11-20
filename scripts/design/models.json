@@ -1,5 +1,5 @@
 {
-  "note": "Names are the ones Abhijit used. This file has no Cursor model slug. Copy a picker id into the shell as DESIGN_PASS_MODEL_FRONTIER, DESIGN_PASS_MODEL_MID, or DESIGN_PASS_MODEL_FAST. Do not commit that id.",
+  "note": "Names are the ones Abhijit used. This file has no Cursor model slug. The orchestrator is the cloud agent's selected model, which is the default frontier model. Stage skills name the model. Do not set shell model ids.",
   "stages": {
     "frame": { "class": "frontier", "name": "Grok 4.7 High" },
     "explore": { "class": "frontier", "name": "Grok 4.7 High" },

@@ -1,0 +1,24 @@
+{
+  "note": "Interim Design Pass allowlist. S3 fails if the live Design Pass environment or repositoryDependencies drifts from membership. The only pull request this run opens is the playground prototype PR. This is not Corellia sealing.",
+  "environment": "design-pass",
+  "primary": "github.com/mattermost/mattermost-proto-playground",
+  "membership": [
+    "github.com/mattermost/mattermost-proto-playground",
+    "github.com/mattermost/compass-design",
+    "github.com/mattermost/mattermost",
+    "github.com/mattermost/internal-product-knowledge"
+  ],
+  "repositoryDependencies": [
+    "github.com/mattermost/compass-design",
+    "github.com/mattermost/mattermost",
+    "github.com/mattermost/internal-product-knowledge"
+  ],
+  "pullRequests": {
+    "always": ["github.com/mattermost/mattermost-proto-playground"],
+    "neverInThisRun": [
+      "github.com/mattermost/compass-design",
+      "github.com/mattermost/mattermost",
+      "github.com/mattermost/internal-product-knowledge"
+    ]
+  }
+}
