@@ -81,26 +81,25 @@ export function triageText(text, overrides = {}) {
         fired.push(`${name}:${hits.join('+')}`);
       }
     }
-    const uiNamed = surfaceHits.length > 0;
-    if (!uiNamed) {
-      tier = 'skip';
-      tierReason = 'no UI surface named';
-      fired.push('skip:no-ui-surface');
+    const phraseTiers = rules.tierOrder.filter((name) =>
+      fired.some((rule) => rule.startsWith(`${name}:`)),
+    );
+    if (phraseTiers.length > 1) {
+      tier = null;
+      tierReason = `tier phrases conflict: ${phraseTiers.join(', ')}`;
+      fired.push(`conflict:${phraseTiers.join('+')}`);
+    } else if (phraseTiers.length === 1) {
+      tier = phraseTiers[0];
+      tierReason = `${tier} phrase`;
+    } else if (surfaceHits.length > 0) {
+      tier = 'tweak';
+      tierReason =
+        'existing UI surface and the ask is a change on that surface; no competing tier phrase';
+      fired.push(`tweak:surface-change:${surfaceHits.join('+')}`);
     } else {
-      for (const name of rules.tierOrder) {
-        if (name === 'skip') {
-          continue;
-        }
-        if (fired.some((rule) => rule.startsWith(`${name}:`))) {
-          tier = name;
-          tierReason = `first matching tier in ${rules.tierOrder.join(' > ')}`;
-          break;
-        }
-      }
-      if (!tier) {
-        tier = null;
-        tierReason = 'UI surface named and no tier keyword fired';
-      }
+      tier = null;
+      tierReason = 'no surface and no tier phrase';
+      fired.push('stop:no-surface-no-tier-phrase');
     }
   }
 

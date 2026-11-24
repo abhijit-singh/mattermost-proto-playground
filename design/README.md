@@ -37,6 +37,10 @@ Triage is deterministic (`scripts/design/triage.rules.json`; no LLM) and prints 
 
 The old names `none`, `note` and `full` are still accepted by `--tier`, `design:<tier>` labels and older packets.
 
+A named existing surface, with no competing tier phrase, is a tweak. That includes a change to warnings, indicators, labels, and similar. A missing tier keyword is not a stop. Intake stops for a person only when the source has no surface and no tier phrase, or when tier phrases conflict. `--tier` overrides both.
+
+For skip, tweak, and explore, intake infers outcome and users from the source when that inference is reliable, marks them `[INFERRED]`, and lists them under `needs_confirmation`. A named surface plus the ticket text is enough for a tweak. Intake does not invent a customer quote. When no customer quote was given, or the decider is not in the source, that field cannot be inferred and the run escalates. Prototype does not infer these four.
+
 Tier sets the stages. **Size** (`small | large`, `scripts/design/size.rules.json`) sets the loop budget: `rounds_max` 4 or 10 (2 for `tweak`). Triage scores what the source shows from keywords and leaves novelty, interaction depth and prior art `unknown`. Frame scores novelty and interaction depth and corrects any keyword score the code contradicts; research scores prior art and novelty. Either may move the size, recording the signals.
 
 **Compliance scope.** Intake turns it on when the source matches a keyword in `triage.rules.json` `compliance` (permissions, roles, ABAC, classification, labels, encryption, audit, retention, export, cross-domain, identity, and similar). Frame turns it on when it records the `permissions_or_security_copy` flag. `--compliance on|off` overrides both. When it is on, research writes a control table (NIST 800-53, 800-207, 800-162, DoD ZT RA, ACP 240, NATO STANAG 4774/4778) using `.cursor/skills/design-pass-research/compliance.md`, and critique line 10 checks that each control the UI must show is visible. Features such as mobile navigation or agent UX do not match a keyword, so the sub-step does not run for them.

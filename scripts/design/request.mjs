@@ -82,79 +82,226 @@ export function buildRequest({ ref, text, flags }) {
       path.basename(ref, path.extname(ref)) ||
       'effort',
   );
-  return {
-    triaged,
-    request: {
-      slug,
-      title: asText(meta.title) || slug,
-      source_kind: kind,
-      source_ref: ref,
-      source_fetch:
-        flags.fetch || (fs.existsSync(ref) ? 'local' : 'not-fetched'),
-      tier: triaged.tier,
-      size: triaged.size,
-      rounds_max: triaged.roundsMax,
-      compliance: triaged.compliance,
-      mode: modeFor(kind, text, flags),
-      rules_fired: triaged.rulesFired,
-      size_signals: triaged.signals,
-      prototype: null,
-      risk_flags: [],
-      risk_score: 0,
-      approval_required: 'pm-or-eng',
-      outcome_headline: asText(meta.outcome_headline || meta.outcome),
-      users: asText(meta.users),
-      customer_words: asText(meta.customer_words),
-      decider: asText(meta.decider),
-      lighthouse_name: asText(meta.lighthouse_name),
-      verified: asText(meta.verified),
-      needs_confirmation: [],
-      stage_frame: 'pending',
-      stage_research: 'pending',
-      stage_explore: 'pending',
-      stage_critique_options: 'pending',
-      stage_build: 'pending',
-      stage_critique: 'pending',
-      stage_persona: 'pending',
-      stage_verify: 'pending',
-      stage_handoff: 'pending',
-      stage_check: 'pending',
-      frame_invalidations: 0,
-      research_invalidates_frame: false,
-      research_invalidation_applied: false,
-      options_round: 0,
-      options_phase: 'explore',
-      options_decision: null,
-      options_applied: false,
-      refine_used: false,
-      refine_option: null,
-      back_edge_research: false,
-      back_edge_frame: false,
-      late_back_edge: false,
-      recommended_option: null,
-      chosen_option: null,
-      chosen_by: null,
-      eligible_options: [],
-      fallback_options: [],
-      explorer_pick: null,
-      build_round: 0,
-      verify_round: 0,
-      verify_repairs: 0,
-      verify_repair_open: false,
-      last_verdict: null,
-      last_scores: {},
-      previous_scores: {},
-      previous_blockers: null,
-      regression_pending: false,
-      check_ok: false,
-      check_ran: false,
-      stop: null,
-      stop_reason: null,
-      prs: 0,
-      started_at: nowIso(),
-      budget_minutes: 90,
-    },
+  const request = {
+    slug,
+    title: asText(meta.title) || slug,
+    source_kind: kind,
+    source_ref: ref,
+    source_fetch: flags.fetch || (fs.existsSync(ref) ? 'local' : 'not-fetched'),
+    tier: triaged.tier,
+    size: triaged.size,
+    rounds_max: triaged.roundsMax,
+    compliance: triaged.compliance,
+    mode: modeFor(kind, text, flags),
+    rules_fired: triaged.rulesFired,
+    size_signals: triaged.signals,
+    prototype: null,
+    risk_flags: [],
+    risk_score: 0,
+    approval_required: 'pm-or-eng',
+    outcome_headline: asText(meta.outcome_headline || meta.outcome),
+    users: asText(meta.users),
+    customer_words: asText(meta.customer_words),
+    decider: asText(meta.decider),
+    lighthouse_name: asText(meta.lighthouse_name),
+    verified: asText(meta.verified),
+    needs_confirmation: [],
+    stage_frame: 'pending',
+    stage_research: 'pending',
+    stage_explore: 'pending',
+    stage_critique_options: 'pending',
+    stage_build: 'pending',
+    stage_critique: 'pending',
+    stage_persona: 'pending',
+    stage_verify: 'pending',
+    stage_handoff: 'pending',
+    stage_check: 'pending',
+    frame_invalidations: 0,
+    research_invalidates_frame: false,
+    research_invalidation_applied: false,
+    options_round: 0,
+    options_phase: 'explore',
+    options_decision: null,
+    options_applied: false,
+    refine_used: false,
+    refine_option: null,
+    back_edge_research: false,
+    back_edge_frame: false,
+    late_back_edge: false,
+    recommended_option: null,
+    chosen_option: null,
+    chosen_by: null,
+    eligible_options: [],
+    fallback_options: [],
+    explorer_pick: null,
+    build_round: 0,
+    verify_round: 0,
+    verify_repairs: 0,
+    verify_repair_open: false,
+    last_verdict: null,
+    last_scores: {},
+    previous_scores: {},
+    previous_blockers: null,
+    regression_pending: false,
+    check_ok: false,
+    check_ran: false,
+    stop: null,
+    stop_reason: null,
+    prs: 0,
+    started_at: nowIso(),
+    budget_minutes: 90,
+    inferred_fields: [],
+    inference_unreliable: [],
   };
+  applyInference(request, text, meta, triaged);
+  return { triaged, request };
+}
+
+const INFER_TIERS = new Set(['skip', 'tweak', 'explore']);
+
+function sourceTitle(text, meta) {
+  if (!isBlank(meta.title)) {
+    return asText(meta.title);
+  }
+  const body = String(text).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+  const heading = body.match(/^#\s+(.+)$/m);
+  if (heading) {
+    return heading[1].trim();
+  }
+  const line = body
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .find(Boolean);
+  return line || '';
+}
+
+function markInferred(request, field, value) {
+  request[field] = `[INFERRED] ${value}`;
+  request.inferred_fields.push(field);
+  request.needs_confirmation.push({
+    field,
+    value: request[field],
+    added_by: 'intake',
+  });
+}
+
+function customerQuote(text, meta) {
+  if (!isBlank(meta.customer_words)) {
+    return { value: asText(meta.customer_words), inferred: false };
+  }
+  const labeled = String(text).match(/customer words:\s*(.+)/i);
+  if (labeled && labeled[1].trim()) {
+    return { value: labeled[1].trim(), inferred: true };
+  }
+  const said = String(text).match(
+    /(?:customer|user)s?\s+said:\s*["“]([^"”]+)["”]/i,
+  );
+  if (said && said[1].trim()) {
+    return { value: said[1].trim(), inferred: true };
+  }
+  return null;
+}
+
+function namedDecider(text, meta) {
+  if (!isBlank(meta.decider)) {
+    return { value: asText(meta.decider), inferred: false };
+  }
+  const labeled = String(text).match(/^\s*decider:\s*(.+)$/im);
+  if (labeled && labeled[1].trim() && !/^(null|~)$/i.test(labeled[1].trim())) {
+    return { value: labeled[1].trim(), inferred: true };
+  }
+  return null;
+}
+
+function namedRole(text) {
+  const roles = [
+    'system admin',
+    'channel admin',
+    'end users',
+    'end user',
+    'admins',
+    'admin',
+    'members',
+    'member',
+    'guests',
+    'guest',
+  ];
+  return roles.find((role) => new RegExp(`\\b${role}\\b`, 'i').test(text));
+}
+
+function applyInference(request, text, meta, triaged) {
+  if (!INFER_TIERS.has(request.tier)) {
+    return;
+  }
+  const title = sourceTitle(text, meta);
+  const surfaces = (triaged.uiSurface || []).slice(0, 4).join(', ');
+  if (isBlank(request.outcome_headline)) {
+    if (title) {
+      markInferred(
+        request,
+        'outcome_headline',
+        request.tier === 'skip' ? `No UI change. ${title}` : title,
+      );
+    } else {
+      request.inference_unreliable.push('outcome_headline');
+    }
+  }
+  if (isBlank(request.users)) {
+    const role = namedRole(text);
+    if (request.tier === 'tweak' && surfaces) {
+      markInferred(
+        request,
+        'users',
+        `People who use ${surfaces}. The ticket says: ${title}`,
+      );
+    } else if (request.tier === 'skip') {
+      markInferred(
+        request,
+        'users',
+        'No UI audience. The source names no surface.',
+      );
+    } else if (role) {
+      markInferred(
+        request,
+        'users',
+        surfaces
+          ? `The ${role} who use ${surfaces}.`
+          : `The ${role} named in the source.`,
+      );
+    } else if (surfaces) {
+      markInferred(
+        request,
+        'users',
+        `People who use ${surfaces}. The ticket says: ${title}`,
+      );
+    } else {
+      request.inference_unreliable.push('users');
+    }
+  }
+  const quote = customerQuote(text, meta);
+  if (isBlank(request.customer_words)) {
+    if (quote && !quote.inferred) {
+      request.customer_words = quote.value;
+    } else if (quote && quote.inferred) {
+      markInferred(request, 'customer_words', quote.value);
+    } else {
+      request.inference_unreliable.push('customer_words');
+    }
+  }
+  const decider = namedDecider(text, meta);
+  if (isBlank(request.decider)) {
+    if (decider && !decider.inferred) {
+      request.decider = decider.value;
+    } else if (decider && decider.inferred) {
+      markInferred(request, 'decider', decider.value);
+    } else {
+      request.inference_unreliable.push('decider');
+    }
+  }
+  if (request.inference_unreliable.length > 0) {
+    request.stop = 'escalate';
+    request.stop_reason = `Cannot infer ${request.inference_unreliable.join(', ')} reliably. A customer quote that was not given is not invented.`;
+  }
 }
 
 function readGithub(ref) {
@@ -287,10 +434,12 @@ function main() {
     ].join('\n'),
   );
   if (request.tier === 'skip') {
-    request.stop = 'skip';
-    request.stop_reason = triaged.tierReason;
-    request.stage_frame = 'skipped';
-    saveRequest(request.slug, request);
+    if (!request.stop) {
+      request.stop = 'skip';
+      request.stop_reason = triaged.tierReason;
+      request.stage_frame = 'skipped';
+      saveRequest(request.slug, request);
+    }
     writeText(
       path.join(dir, 'decision.md'),
       `# Decision\n\ntier: skip\nreason: ${triaged.tierReason}\nrules: ${request.rules_fired.join('; ')}\nsource: ${ref}\n`,
@@ -310,6 +459,9 @@ function main() {
     compliance: request.compliance,
     mode: request.mode,
     stop: request.stop,
+    stop_reason: request.stop_reason,
+    inferred: (request.inferred_fields || []).join(', '),
+    unreliable: (request.inference_unreliable || []).join(', '),
     missing_critical: criticalMissing.join(', '),
     rules: request.rules_fired.join('; '),
   });

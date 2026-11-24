@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import {
   appendLog,
   die,
+  isBlank,
   loadRequest,
   loadRubric,
   minutesSince,
@@ -433,6 +434,21 @@ function finish(slug, request) {
 
 export function planNext(slug) {
   const request = loadRequest(slug);
+  if (
+    request.stop === 'escalate' &&
+    Array.isArray(request.inference_unreliable) &&
+    request.inference_unreliable.length > 0 &&
+    request.inference_unreliable.every((field) => !isBlank(request[field]))
+  ) {
+    request.stop = null;
+    request.stop_reason = null;
+    request.inference_unreliable = [];
+    appendLog(
+      slug,
+      'inference filled',
+      'The fields intake could not infer are now present.',
+    );
+  }
   if (request.stop === 'gap' && missingCritical(request).length === 0) {
     request.stop = null;
     request.stop_reason = null;

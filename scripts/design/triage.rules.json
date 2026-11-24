@@ -22,7 +22,24 @@
     "button",
     "channel",
     "prototype",
-    "ui"
+    "ui",
+    "warning",
+    "warnings",
+    "indicator",
+    "indicators",
+    "label",
+    "labels",
+    "badge",
+    "badges",
+    "toast",
+    "toasts",
+    "tooltip",
+    "tooltips",
+    "hint",
+    "hints",
+    "placeholder",
+    "alert",
+    "notice"
   ],
   "tiers": {
     "prototype": {
