@@ -39,7 +39,11 @@ The old names `none`, `note` and `full` are still accepted by `--tier`, `design:
 
 A named existing surface, with no competing tier phrase, is a tweak. That includes a change to warnings, indicators, labels, and similar. A missing tier keyword is not a stop. Intake stops for a person only when the source has no surface and no tier phrase, or when tier phrases conflict. `--tier` overrides both.
 
-For skip, tweak, and explore, intake infers outcome and users from the source when that inference is reliable, marks them `[INFERRED]`, and lists them under `needs_confirmation`. A named surface plus the ticket text is enough for a tweak. Intake does not invent a customer quote. When no customer quote was given, or the decider is not in the source, that field cannot be inferred and the run escalates. Prototype does not infer these four.
+Intake reads the whole source. A Jira key or GitHub issue is not triaged from the key or title alone. If the body cannot be read, intake stops and says the source was unreadable. It does not invent ticket text.
+
+The triage agent proposes a tier, an outcome, and a decider, each grounded in that full text. Inferred values are marked `[INFERRED]`. The script is the gate: it accepts the proposal or stops. `--tier` overrides the tier. A named existing surface with a change on it, including warnings, indicators, and labels, is a tweak and continues. Tier phrases that conflict escalate. Outcome or decider that cannot be grounded in the source escalate.
+
+Users and customer words are optional. Leaving either empty is not an escalation. They are recorded only when the source actually contains them. A customer quote that was not given is not invented.
 
 Tier sets the stages. **Size** (`small | large`, `scripts/design/size.rules.json`) sets the loop budget: `rounds_max` 4 or 10 (2 for `tweak`). Triage scores what the source shows from keywords and leaves novelty, interaction depth and prior art `unknown`. Frame scores novelty and interaction depth and corrects any keyword score the code contradicts; research scores prior art and novelty. Either may move the size, recording the signals.
 

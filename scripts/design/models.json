@@ -10,6 +10,7 @@
     "persona": { "class": "mid", "name": "Sonnet 5.5" },
     "verify": { "class": "mid", "name": "Sonnet 5.5" },
     "handoff": { "class": "mid", "name": "Sonnet 5.5" },
-    "lookup": { "class": "fast", "name": "Sonnet 5.5" }
+    "lookup": { "class": "fast", "name": "Sonnet 5.5" },
+    "triage": { "class": "mid", "name": "Sonnet 5.5" }
   }
 }

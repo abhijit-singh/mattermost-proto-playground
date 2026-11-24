@@ -17,7 +17,7 @@ Scripts decide the tier, the next step, the median score, the round count, and t
 
 - Run intake as a script, with no model. Honor skip, tweak, explore, and prototype.
 - Run each AI stage as its own subagent. The stage skill says which model name to use.
-- On a missing outcome, users, customer words, or decider, stop. Do not draft those four.
+- On an outcome or decider that cannot be grounded in the source, stop. Users and customer words are optional. Do not invent a customer quote.
 - Draft any other gated field as `[AI DRAFT]` and list it under `needs_confirmation`. Continue.
 - Copy the option-gate recommendation. A sole eligible option skips the gate and is recorded as sole-eligible.
 - The critique step picks one or two personas from `design/personas/` (the FY26 catalog's MissionOps panel). Do not invent a persona.

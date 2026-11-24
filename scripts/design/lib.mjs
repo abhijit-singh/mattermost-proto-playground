@@ -7,12 +7,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 export const repoRoot = path.resolve(here, '../..');
 export const designRoot = path.join(repoRoot, 'design');
 
-export const CRITICAL_FIELDS = [
-  'outcome_headline',
-  'users',
-  'customer_words',
-  'decider',
-];
+export const CRITICAL_FIELDS = ['outcome_headline', 'decider'];
 
 export const DRAFTABLE_FIELDS = ['lighthouse_name', 'verified'];
 

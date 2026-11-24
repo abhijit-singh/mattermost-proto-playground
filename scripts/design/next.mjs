@@ -489,7 +489,7 @@ export function planNext(slug) {
     if (missing.length) {
       request.stage_frame = 'pending';
       request.stop = 'gap';
-      request.stop_reason = `Missing ${missing.join(', ')}. Do not draft these. A person fills the named field and the frame re-runs.`;
+      request.stop_reason = `Missing ${missing.join(', ')}. Outcome and the decider must be grounded in the source. A person fills the named field and the frame re-runs.`;
       step = stopStep('gap', request.stop_reason, {
         fields: missing.join(', '),
       });

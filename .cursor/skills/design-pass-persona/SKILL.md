@@ -18,9 +18,9 @@ Do not run `compass-migrate`. Do not run `prototype-to-production`.
 
 Record this stage with `node scripts/design/stage.mjs <slug> start persona` and `complete persona`. Do not edit another stage's block.
 
-Never draft outcome, users, customer words, or the decider. If one is missing, stop and name the field. In autopilot, draft any other missing human-only field as `[AI DRAFT]` and pass it with `--set` so it is listed under `needs_confirmation`. In gated mode, leave human-only fields as `GAP (owner)`.
+Never draft outcome or the decider. If either is missing after intake, stop and name the field. Users and customer words are optional. Do not invent a customer quote. Include them only when the source contains them. In autopilot, draft any other missing human-only field as `[AI DRAFT]` and pass it with `--set` so it is listed under `needs_confirmation`. In gated mode, leave those other fields as `GAP (owner)`.
 
-A person is required only for an escalation, or when outcome, users, customer words, or the decider is missing.
+A person is required only for an escalation, or when outcome or the decider cannot be grounded in the source.
 
 Read `node scripts/design/brief.mjs <slug> persona <persona>` and that one profile under `design/personas/`. Attempt the primary task. Write `design/<slug>/rounds/<n>/persona.<persona>.md` with `completed: true` or `completed: false`, and `blocker: true` or `blocker: false`.
 

@@ -71,7 +71,7 @@ function assignSet(request, expression, { allowCritical, by }) {
     key === 'outcome.headline' ? 'outcome_headline' : key.replace(/\./g, '_');
   if (CRITICAL_FIELDS.includes(field) && !allowCritical) {
     die(
-      `Refusing to draft ${field}. Outcome, users, customer words, and the decider are filled by a person with stage.mjs fill --by.`,
+      `Refusing to draft ${field}. Outcome and the decider are filled by a person with stage.mjs fill --by.`,
     );
   }
   if ((raw === 'true' || raw === 'false') && field !== 'verified') {

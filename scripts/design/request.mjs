@@ -1,20 +1,21 @@
-import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  CRITICAL_FIELDS,
   appendLog,
   die,
   isBlank,
   kebab,
+  loadYaml,
   nowIso,
   packetDir,
   parseYaml,
   printResult,
-  readText,
   saveRequest,
   writeText,
 } from './lib.mjs';
+import { readFullSource } from './source.mjs';
 import { triageText } from './triage.mjs';
 
 function isMain() {
@@ -153,26 +154,142 @@ export function buildRequest({ ref, text, flags }) {
     inferred_fields: [],
     inference_unreliable: [],
   };
-  applyInference(request, text, meta, triaged);
+  applyInference(request, text, meta, flags.proposal);
   return { triaged, request };
 }
 
-const INFER_TIERS = new Set(['skip', 'tweak', 'explore']);
+function normalize(value) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
 
-function sourceTitle(text, meta) {
-  if (!isBlank(meta.title)) {
-    return asText(meta.title);
+function stripMark(value) {
+  return String(value || '')
+    .replace(/^\[INFERRED\]\s*/i, '')
+    .trim();
+}
+
+export function groundedIn(value, text) {
+  const needle = normalize(stripMark(value));
+  if (!needle) {
+    return false;
   }
-  const body = String(text).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
-  const heading = body.match(/^#\s+(.+)$/m);
-  if (heading) {
-    return heading[1].trim();
+  return normalize(text).includes(needle);
+}
+
+function labeledValue(text, label) {
+  const match = String(text).match(new RegExp(`^\\s*${label}:\\s*(.+)$`, 'im'));
+  if (!match) {
+    return '';
   }
-  const line = body
-    .split(/\r?\n/)
-    .map((item) => item.trim())
-    .find(Boolean);
-  return line || '';
+  const value = match[1].trim();
+  if (!value || /^(null|~|unassigned)$/i.test(value)) {
+    return '';
+  }
+  return value;
+}
+
+function uniquePeople(text) {
+  const names = ['reporter', 'assignee', 'creator']
+    .map((label) => labeledValue(text, label))
+    .filter(Boolean);
+  return [...new Set(names)];
+}
+
+export function proposeFromSource(text, meta) {
+  const proposal = {
+    outcome_headline: null,
+    decider: null,
+    users: null,
+    customer_words: null,
+    outcome_inferred: false,
+    decider_inferred: false,
+    users_inferred: false,
+    customer_words_inferred: false,
+  };
+  if (!isBlank(meta.outcome_headline) || !isBlank(meta.outcome)) {
+    proposal.outcome_headline = asText(meta.outcome_headline || meta.outcome);
+  } else {
+    const expected = String(text).match(/\*{0,2}expected:\*{0,2}\s*(.+)/i);
+    const summary = labeledValue(text, 'summary');
+    const withoutFrontmatter = String(text).replace(
+      /^---\r?\n[\s\S]*?\r?\n---\r?\n?/,
+      '',
+    );
+    const heading = withoutFrontmatter.match(/^#\s+(.+)$/m);
+    const paragraph = withoutFrontmatter
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .find((line) => line && !line.startsWith('#'));
+    const candidate = expected
+      ? expected[1].trim()
+      : summary || (heading ? heading[1].trim() : paragraph || '');
+    if (candidate && groundedIn(candidate, text)) {
+      proposal.outcome_headline = candidate;
+      proposal.outcome_inferred = true;
+    }
+  }
+  if (!isBlank(meta.decider)) {
+    proposal.decider = asText(meta.decider);
+  } else {
+    const explicit = labeledValue(text, 'decider');
+    if (explicit && groundedIn(explicit, text)) {
+      proposal.decider = explicit;
+      proposal.decider_inferred = true;
+    } else {
+      const people = uniquePeople(text);
+      if (people.length === 1 && groundedIn(people[0], text)) {
+        proposal.decider = people[0];
+        proposal.decider_inferred = true;
+      }
+    }
+  }
+  if (!isBlank(meta.users)) {
+    proposal.users = asText(meta.users);
+  } else {
+    const users = labeledValue(text, 'users');
+    if (users && groundedIn(users, text)) {
+      proposal.users = users;
+      proposal.users_inferred = true;
+    }
+  }
+  if (!isBlank(meta.customer_words)) {
+    proposal.customer_words = asText(meta.customer_words);
+  } else {
+    const words = labeledValue(text, 'customer words');
+    const said = String(text).match(
+      /(?:customer|user)s?\s+said:\s*["“]([^"”]+)["”]/i,
+    );
+    const quote = words || (said ? said[1].trim() : '');
+    if (quote && groundedIn(quote, text)) {
+      proposal.customer_words = quote;
+      proposal.customer_words_inferred = true;
+    }
+  }
+  return proposal;
+}
+
+export function acceptProposal(proposal, text) {
+  const problems = [];
+  if (!proposal || !groundedIn(proposal.outcome_headline, text)) {
+    problems.push('outcome_headline');
+  }
+  if (!proposal || !groundedIn(proposal.decider, text)) {
+    problems.push('decider');
+  }
+  if (proposal && proposal.users && !groundedIn(proposal.users, text)) {
+    problems.push('users');
+  }
+  if (
+    proposal &&
+    proposal.customer_words &&
+    !groundedIn(proposal.customer_words, text)
+  ) {
+    problems.push('customer_words');
+  }
+  return problems;
 }
 
 function markInferred(request, field, value) {
@@ -185,161 +302,56 @@ function markInferred(request, field, value) {
   });
 }
 
-function customerQuote(text, meta) {
-  if (!isBlank(meta.customer_words)) {
-    return { value: asText(meta.customer_words), inferred: false };
-  }
-  const labeled = String(text).match(/customer words:\s*(.+)/i);
-  if (labeled && labeled[1].trim()) {
-    return { value: labeled[1].trim(), inferred: true };
-  }
-  const said = String(text).match(
-    /(?:customer|user)s?\s+said:\s*["“]([^"”]+)["”]/i,
-  );
-  if (said && said[1].trim()) {
-    return { value: said[1].trim(), inferred: true };
-  }
-  return null;
-}
-
-function namedDecider(text, meta) {
-  if (!isBlank(meta.decider)) {
-    return { value: asText(meta.decider), inferred: false };
-  }
-  const labeled = String(text).match(/^\s*decider:\s*(.+)$/im);
-  if (labeled && labeled[1].trim() && !/^(null|~)$/i.test(labeled[1].trim())) {
-    return { value: labeled[1].trim(), inferred: true };
-  }
-  return null;
-}
-
-function namedRole(text) {
-  const roles = [
-    'system admin',
-    'channel admin',
-    'end users',
-    'end user',
-    'admins',
-    'admin',
-    'members',
-    'member',
-    'guests',
-    'guest',
+function applyProposal(request, proposal) {
+  const fields = [
+    ['outcome_headline', 'outcome_inferred'],
+    ['decider', 'decider_inferred'],
+    ['users', 'users_inferred'],
+    ['customer_words', 'customer_words_inferred'],
   ];
-  return roles.find((role) => new RegExp(`\\b${role}\\b`, 'i').test(text));
+  for (const [field, inferredFlag] of fields) {
+    if (isBlank(proposal[field])) {
+      continue;
+    }
+    if (proposal[inferredFlag]) {
+      markInferred(request, field, stripMark(proposal[field]));
+    } else if (isBlank(request[field])) {
+      request[field] = stripMark(proposal[field]);
+    }
+  }
+  const missing = ['outcome_headline', 'decider'].filter((field) =>
+    isBlank(request[field]),
+  );
+  request.inference_unreliable = missing;
+  if (missing.length > 0) {
+    request.stop = 'escalate';
+    request.stop_reason = `Cannot ground ${missing.join(', ')} in the source.`;
+  }
 }
 
-function applyInference(request, text, meta, triaged) {
-  if (!INFER_TIERS.has(request.tier)) {
+function applyInference(request, text, meta, proposal) {
+  if (!request.tier) {
     return;
   }
-  const title = sourceTitle(text, meta);
-  const surfaces = (triaged.uiSurface || []).slice(0, 4).join(', ');
-  if (isBlank(request.outcome_headline)) {
-    if (title) {
-      markInferred(
-        request,
-        'outcome_headline',
-        request.tier === 'skip' ? `No UI change. ${title}` : title,
-      );
-    } else {
-      request.inference_unreliable.push('outcome_headline');
-    }
-  }
-  if (isBlank(request.users)) {
-    const role = namedRole(text);
-    if (request.tier === 'tweak' && surfaces) {
-      markInferred(
-        request,
-        'users',
-        `People who use ${surfaces}. The ticket says: ${title}`,
-      );
-    } else if (request.tier === 'skip') {
-      markInferred(
-        request,
-        'users',
-        'No UI audience. The source names no surface.',
-      );
-    } else if (role) {
-      markInferred(
-        request,
-        'users',
-        surfaces
-          ? `The ${role} who use ${surfaces}.`
-          : `The ${role} named in the source.`,
-      );
-    } else if (surfaces) {
-      markInferred(
-        request,
-        'users',
-        `People who use ${surfaces}. The ticket says: ${title}`,
-      );
-    } else {
-      request.inference_unreliable.push('users');
-    }
-  }
-  const quote = customerQuote(text, meta);
-  if (isBlank(request.customer_words)) {
-    if (quote && !quote.inferred) {
-      request.customer_words = quote.value;
-    } else if (quote && quote.inferred) {
-      markInferred(request, 'customer_words', quote.value);
-    } else {
-      request.inference_unreliable.push('customer_words');
-    }
-  }
-  const decider = namedDecider(text, meta);
-  if (isBlank(request.decider)) {
-    if (decider && !decider.inferred) {
-      request.decider = decider.value;
-    } else if (decider && decider.inferred) {
-      markInferred(request, 'decider', decider.value);
-    } else {
-      request.inference_unreliable.push('decider');
-    }
-  }
-  if (request.inference_unreliable.length > 0) {
+  const chosen = proposal || proposeFromSource(text, meta);
+  if (proposal && proposal.tier && proposal.tier !== request.tier) {
     request.stop = 'escalate';
-    request.stop_reason = `Cannot infer ${request.inference_unreliable.join(', ')} reliably. A customer quote that was not given is not invented.`;
+    request.stop_reason = `Script rejected proposed tier ${proposal.tier}. The gate decided ${request.tier}.`;
+    return;
   }
-}
-
-function readGithub(ref) {
-  const match = String(ref).match(
-    /github\.com\/([^/\s]+)\/([^/\s]+)\/(issues|pull)\/(\d+)/,
-  );
-  if (!match) {
-    return null;
-  }
-  const [, owner, repo, kind, number] = match;
-  try {
-    const out = execFileSync(
-      'gh',
-      [
-        kind === 'pull' ? 'pr' : 'issue',
-        'view',
-        number,
-        '--repo',
-        `${owner}/${repo}`,
-        '--json',
-        'title,body',
-      ],
-      {
-        timeout: 15000,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-        env: {
-          ...process.env,
-          GIT_TERMINAL_PROMPT: '0',
-          GH_PROMPT_DISABLED: '1',
-        },
-      },
+  const problems = acceptProposal(chosen, text);
+  if (problems.length > 0) {
+    request.stop = 'escalate';
+    request.inference_unreliable = problems;
+    const invented = problems.filter(
+      (field) => field === 'users' || field === 'customer_words',
     );
-    const json = JSON.parse(out);
-    return `${json.title || ''}\n\n${json.body || ''}`;
-  } catch {
-    return null;
+    request.stop_reason = invented.length
+      ? `Script rejected ${invented.join(', ')}. Those values are not in the source.`
+      : `Cannot ground ${problems.join(', ')} in the source.`;
+    return;
   }
+  applyProposal(request, chosen);
 }
 
 function parseFlags(argv) {
@@ -362,6 +374,10 @@ function parseFlags(argv) {
       flags.compliance = argv[++i];
     } else if (arg === '--slug') {
       flags.slug = argv[++i];
+    } else if (arg === '--source-file') {
+      flags.sourceFile = argv[++i];
+    } else if (arg === '--proposal') {
+      flags.proposalPath = argv[++i];
     } else if (!arg.startsWith('--')) {
       positionals.push(arg);
     } else {
@@ -379,20 +395,20 @@ function main() {
       'usage: npm run design:request -- <source> [--gated|--autopilot] [--tier X] [--size X] [--compliance on|off]',
     );
   }
-  let text = ref;
-  if (fs.existsSync(ref)) {
-    text = readText(ref);
-    flags.fetch = 'local';
-  } else {
-    const remote = readGithub(ref);
-    if (remote) {
-      text = remote;
-      flags.fetch = 'github-read';
-    } else {
-      flags.fetch = 'not-fetched';
-    }
+  if (flags.proposalPath) {
+    flags.proposal = loadYaml(flags.proposalPath);
   }
-  const { request, triaged } = buildRequest({ ref, text, flags });
+  const read = readFullSource(ref, flags.sourceFile);
+  if (read.fetch === 'unreadable') {
+    printResult({
+      source: ref,
+      stop: 'unreadable',
+      reason: 'The source was unreadable.',
+    });
+    process.exit(2);
+  }
+  flags.fetch = read.fetch;
+  const { request, triaged } = buildRequest({ ref, text: read.text, flags });
   if (!request.tier) {
     printResult({
       tier: null,
@@ -414,7 +430,7 @@ function main() {
         source_kind: request.source_kind,
         source_ref: request.source_ref,
         source_fetch: request.source_fetch,
-        text,
+        text: read.text,
       },
       null,
       2,
@@ -445,12 +461,9 @@ function main() {
       `# Decision\n\ntier: skip\nreason: ${triaged.tierReason}\nrules: ${request.rules_fired.join('; ')}\nsource: ${ref}\n`,
     );
   }
-  const criticalMissing = [
-    'outcome_headline',
-    'users',
-    'customer_words',
-    'decider',
-  ].filter((field) => isBlank(request[field]));
+  const criticalMissing = CRITICAL_FIELDS.filter((field) =>
+    isBlank(request[field]),
+  );
   printResult({
     slug: request.slug,
     tier: request.tier,
