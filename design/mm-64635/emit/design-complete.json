@@ -1,0 +1,36 @@
+{
+  "slug": "mm-64635",
+  "tier": "tweak",
+  "mode": "autopilot",
+  "stop": "emit",
+  "prs": 1,
+  "targets": "playground",
+  "posted": false,
+  "pull_request_opened": false,
+  "risk_score": 4,
+  "approval_required": "designer",
+  "chosen_option": null,
+  "chosen_by": null,
+  "decider": "Cursor Agent",
+  "designer_recommendation": {
+    "involve": true,
+    "reason": "Compliance is on (policy-based access control), and the ticket carries the needs-ux label. The ticket gives no visual treatment for the highlight and links a Figma file for the System Console layout. A designer should confirm how a deleted attribute reads inside a policy."
+  },
+  "needs_confirmation": [
+    {
+      "field": "outcome_headline",
+      "value": "[INFERRED] Highlight it in the policy if it is using a deleted attribute",
+      "added_by": "triage"
+    },
+    {
+      "field": "lighthouse_name",
+      "value": "[AI DRAFT] none named in MM-64635",
+      "added_by": "frame"
+    },
+    {
+      "field": "verified",
+      "value": "[AI DRAFT] not verified",
+      "added_by": "frame"
+    }
+  ]
+}

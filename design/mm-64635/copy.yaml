@@ -1,0 +1,188 @@
+# Reused strings cite the en.json key in a comment.
+# New strings include why no key matched. Sentence case.
+
+strings:
+  # en.json admin.global_attributes.title
+  - id: admin.global_attributes.title
+    defaultMessage: Attribute Management
+  # en.json admin.global_attributes.subtitle
+  - id: admin.global_attributes.subtitle
+    defaultMessage: Define an attribute once, then choose which resources can use it.
+  # en.json admin.global_attributes.new_attribute
+  - id: admin.global_attributes.new_attribute
+    defaultMessage: New attribute
+  # en.json admin.global_attributes.search.placeholder
+  - id: admin.global_attributes.search.placeholder
+    defaultMessage: Search attributes
+  # en.json admin.global_attributes.table.attribute
+  - id: admin.global_attributes.table.attribute
+    defaultMessage: Attribute
+  # en.json admin.global_attributes.table.type
+  - id: admin.global_attributes.table.type
+    defaultMessage: Type
+  # en.json admin.global_attributes.table.applies_to
+  - id: admin.global_attributes.table.applies_to
+    defaultMessage: Applies to
+  # en.json admin.global_attributes.table.source
+  - id: admin.global_attributes.table.source
+    defaultMessage: Source
+  # en.json admin.global_attributes.table.options
+  - id: admin.global_attributes.table.options
+    defaultMessage: Options
+  # en.json admin.global_attributes.table.type.select
+  - id: admin.global_attributes.table.type.select
+    defaultMessage: Select
+  # en.json admin.global_attributes.table.type.text
+  - id: admin.global_attributes.table.type.text
+    defaultMessage: Text
+  # en.json admin.global_attributes.attribute_details.applies_to.resource_type.user
+  - id: admin.global_attributes.attribute_details.applies_to.resource_type.user
+    defaultMessage: Users
+  # en.json admin.global_attributes.table.source.managed
+  - id: admin.global_attributes.table.source.managed
+    defaultMessage: Managed here
+  # en.json admin.global_attributes.table.options.free_text
+  - id: admin.global_attributes.table.options.free_text
+    defaultMessage: Free Text
+  # en.json admin.global_attributes.table.options.count — rendered for 4 and 6
+  - id: admin.global_attributes.table.options.count
+    defaultMessage: '{count, plural, one {# option} other {# options}}'
+  # en.json admin.global_attributes.table.actions.tooltip
+  - id: admin.global_attributes.table.actions.tooltip
+    defaultMessage: More actions
+  # en.json admin.global_attributes.table.actions.delete
+  - id: admin.global_attributes.table.actions.delete
+    defaultMessage: Delete attribute
+  # en.json admin.global_attributes.confirm.delete.title — name is Clearance
+  - id: admin.global_attributes.confirm.delete.title
+    defaultMessage: Delete {name} attribute
+  # en.json admin.system_properties.confirm.delete.button
+  - id: admin.system_properties.confirm.delete.button
+    defaultMessage: Delete
+  # en.json admin.access_control.edit_policy.cancel
+  - id: admin.access_control.edit_policy.cancel
+    defaultMessage: Cancel
+  # en.json admin.global_attributes.confirm.delete.body
+  - id: admin.global_attributes.confirm.delete.body
+    defaultMessage: Deleting this attribute will permanently remove its definition. This action cannot be undone.
+  # en.json admin.access_control.policies.title
+  - id: admin.access_control.policies.title
+    defaultMessage: Membership Policies
+  # en.json admin.access_control.policies.description
+  - id: admin.access_control.policies.description
+    defaultMessage: Create policies containing attribute-based membership rules and the channels they apply to.
+  # en.json admin.access_control.policies.add_policy
+  - id: admin.access_control.policies.add_policy
+    defaultMessage: Add policy
+  # en.json admin.access_control.policies.name
+  - id: admin.access_control.policies.name
+    defaultMessage: Name
+  # en.json admin.access_control.policies.applies_to
+  - id: admin.access_control.policies.applies_to
+    defaultMessage: Applies to
+  # en.json admin.access_control.policies.resources.channels — rendered for 3 and 1
+  - id: admin.access_control.policies.resources.channels
+    defaultMessage: '{count, number} {count, plural, one {channel} other {channels}}'
+  # en.json admin.access_control.policies.refresh
+  - id: admin.access_control.policies.refresh
+    defaultMessage: Refresh list
+  # en.json admin.access_control.policies.menu.aria_label
+  - id: admin.access_control.policies.menu.aria_label
+    defaultMessage: Policy actions menu
+  # en.json admin.access_control.policy.edit_policy.title
+  - id: admin.access_control.policy.edit_policy.title
+    defaultMessage: Edit Membership Policy
+  # en.json admin.access_control.edit_policy.save
+  - id: admin.access_control.edit_policy.save
+    defaultMessage: Save
+  # en.json admin.access_control.policy.edit_policy.policyName includes a trailing colon, so the label drops it
+  - id: admin.access_control.policy.edit_policy.policyName
+    defaultMessage: Membership policy name
+  # en.json admin.access_control.policy.edit_policy.access_rules.title
+  - id: admin.access_control.policy.edit_policy.access_rules.title
+    defaultMessage: Attribute-based membership rules
+  # en.json admin.access_control.policy.edit_policy.access_rules.subtitle
+  - id: admin.access_control.policy.edit_policy.access_rules.subtitle
+    defaultMessage: Select user attributes and values that qualifying users must have
+  # en.json admin.access_control.policy.edit_policy.switch_to_advanced is title case; shown in sentence case
+  - id: admin.access_control.policy.edit_policy.switch_to_advanced
+    defaultMessage: Switch to advanced mode
+  # en.json admin.access_control.table_editor.attribute
+  - id: admin.access_control.table_editor.attribute
+    defaultMessage: Attribute
+  # en.json admin.access_control.table_editor.operator
+  - id: admin.access_control.table_editor.operator
+    defaultMessage: Operator
+  # en.json admin.access_control.table_editor.values
+  - id: admin.access_control.table_editor.values
+    defaultMessage: Values
+  # en.json admin.access_control.table_editor.operator.is
+  - id: admin.access_control.table_editor.operator.is
+    defaultMessage: is
+  # en.json admin.access_control.table_editor.add_attribute
+  - id: admin.access_control.table_editor.add_attribute
+    defaultMessage: Add attribute
+  # en.json admin.access_control.table_editor.remove_row
+  - id: admin.access_control.table_editor.remove_row
+    defaultMessage: Remove row
+  # en.json admin.access_control.table_editor.selector.select_attribute
+  - id: admin.access_control.table_editor.selector.select_attribute
+    defaultMessage: Select attribute
+  # en.json admin.access_control.table_editor.value.select_value
+  - id: admin.access_control.table_editor.value.select_value
+    defaultMessage: Select value
+  # en.json admin.access_control.table_editor.help_text
+  - id: admin.access_control.table_editor.help_text
+    defaultMessage: Each row is a single condition that must be met for a user to comply with the policy. All rules are combined with logical AND operator (`&&`).
+  # en.json admin.access_control.policy.edit_policy.channel_selector.title
+  - id: admin.access_control.policy.edit_policy.channel_selector.title
+    defaultMessage: Assigned channels
+  # en.json admin.access_control.policy.edit_policy.channel_selector.subtitle
+  - id: admin.access_control.policy.edit_policy.channel_selector.subtitle
+    defaultMessage: Add channels that this membership policy will apply to.
+  # en.json admin.access_control.policy.edit_policy.channel_selector.addChannels
+  - id: admin.access_control.policy.edit_policy.channel_selector.addChannels
+    defaultMessage: Add channels
+  # en.json admin.sidebar.systemAttributes
+  - id: admin.sidebar.systemAttributes
+    defaultMessage: System Attributes
+  # en.json admin.accesscontrol.title
+  - id: admin.accesscontrol.title
+    defaultMessage: Attribute-Based Access
+  # en.json admin.sidebar.global_attributes
+  - id: admin.sidebar.global_attributes
+    defaultMessage: Attribute Management
+  # en.json admin.sidebar.membershipPolicies
+  - id: admin.sidebar.membershipPolicies
+    defaultMessage: Membership Policies
+
+  - id: admin.global_attributes.confirm.delete.policy_reference
+    defaultMessage: '{name} applies to users. The {policy} membership policy still uses this attribute, and that policy will be flagged.'
+    why: en.json admin.global_attributes.confirm.delete.body only says the definition is removed. It does not name the policy, the user scope, or that the policy will be flagged. admin.global_attributes.confirm.delete.error.has_dependents is the 409 for linked attributes and says the delete is blocked.
+  - id: admin.access_control.policy.deleted_attribute.notice.title
+    defaultMessage: A rule still uses a deleted attribute
+    why: No policy-editor notice names a deleted attribute. The existing notices cover missing user attributes, a channel missing a value, masked values, and mixed channel types.
+  - id: admin.access_control.policy.deleted_attribute.notice.text
+    defaultMessage: '{name} no longer exists. Edit or remove the marked rule.'
+    why: No en.json string says a rule still names an attribute that was deleted, or tells the admin to edit or remove that rule, without claiming who can access a channel.
+  - id: admin.access_control.policy.deleted_attribute.list_tag
+    defaultMessage: Uses a deleted attribute
+    why: The Membership Policies list has no warning tag. No en.json string is a text indicator for one policy that still names a deleted attribute.
+  - id: admin.access_control.policy.deleted_attribute.rule_tag
+    defaultMessage: Deleted attribute
+    why: No en.json tag marks a single rule whose attribute was deleted. The list tag is a different sentence, so this shorter row mark is separate.
+  - id: admin.global_attributes.deleted.notice.title
+    defaultMessage: '{policy} still uses {name}'
+    why: No en.json string names the membership policy that still uses an attribute after that attribute is deleted. admin.global_attributes.confirm.delete.body does not mention a policy.
+  - id: admin.global_attributes.deleted.notice.text
+    defaultMessage: '{name} deleted. 1 membership policy still uses it.'
+    why: No en.json string announces a completed attribute delete together with the count of membership policies that still name it. A toast that only says deleted would hide the next step.
+  - id: admin.global_attributes.deleted.view_policy
+    defaultMessage: View flagged policy
+    why: No en.json string is the next step from Attribute Management to the one membership policy that still names the deleted attribute.
+  - id: admin.global_attributes.confirm.delete.error.still_listed.title
+    defaultMessage: Could not delete {name}
+    why: admin.global_attributes.confirm.delete.error.generic does not name the attribute. The 409 title does not exist; that string is about linked attributes, not a failed delete that leaves the row in place.
+  - id: admin.global_attributes.confirm.delete.error.still_listed.text
+    defaultMessage: '{name} is still in the list. Open its actions and choose Delete attribute to try again.'
+    why: admin.global_attributes.confirm.delete.error.generic says "Please try again" and does not say the row is still there or which control retries the delete.

@@ -1,0 +1,37 @@
+states:
+  - id: loading
+    required: true
+    scene: null
+    na_reason: This tweak does not change the existing table loading state.
+  - id: empty
+    required: true
+    scene: null
+    na_reason: This tweak does not change the existing table empty state.
+  - id: error
+    required: true
+    scene: attributes-delete-error
+    na_reason: null
+  - id: success
+    required: true
+    scene: policy-detail-deleted-attribute
+    na_reason: null
+  - id: attributes-delete-confirm
+    required: true
+    scene: attributes-delete-confirm
+    na_reason: null
+  - id: attributes-after-delete
+    required: true
+    scene: attributes-after-delete
+    na_reason: null
+  - id: policy-list-deleted-attribute
+    required: true
+    scene: policy-list-deleted-attribute
+    na_reason: null
+  - id: policy-detail-deleted-attribute
+    required: true
+    scene: policy-detail-deleted-attribute
+    na_reason: null
+  - id: attributes-delete-error
+    required: true
+    scene: attributes-delete-error
+    na_reason: null

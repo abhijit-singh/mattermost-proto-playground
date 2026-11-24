@@ -1,0 +1,10 @@
+.attribute-management {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+
+  &__search {
+    width: 100%;
+    max-width: calc(var(--spacing-xxxxxl) * 7);
+  }
+}
