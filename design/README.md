@@ -41,7 +41,9 @@ A named existing surface, with no competing tier phrase, is a tweak. That includ
 
 Intake reads the whole source. A Jira key or GitHub issue is not triaged from the key or title alone. If the body cannot be read, intake stops and says the source was unreadable. It does not invent ticket text.
 
-The triage agent proposes a tier, an outcome, and a decider, each grounded in that full text. Inferred values are marked `[INFERRED]`. The script is the gate: it accepts the proposal or stops. `--tier` overrides the tier. A named existing surface with a change on it, including warnings, indicators, and labels, is a tweak and continues. Tier phrases that conflict escalate. Outcome or decider that cannot be grounded in the source escalate.
+The triage agent decides the tier from the whole source and writes `design/<slug>/triage.json`. The script checks that file. Keyword hits are signals. A missing keyword does not stop the run. `--tier`, a `design:*` label, or a Seed `ask:` overrides the tier. A named existing surface with a change on it, including warnings, indicators, and labels, is a tweak and continues. The run escalates when the source is unreadable, the outcome cannot be grounded, the tier confidence is low, or the proposal contradicts a strong signal such as "new page" or "new flow".
+
+The person who started the run is always the decider. The decider is not read from the ticket and never causes a stop. That person may assign the pull request to someone else. The triage agent recommends whether a designer should be involved, with the reason. That recommendation is not a gate.
 
 Users and customer words are optional. Leaving either empty is not an escalation. They are recorded only when the source actually contains them. A customer quote that was not given is not invented.
 

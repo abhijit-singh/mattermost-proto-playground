@@ -5,6 +5,16 @@
     "note": "tweak",
     "full": "prototype"
   },
+  "strongSignals": {
+    "prototype": [
+      "new page",
+      "new flow",
+      "new screen",
+      "new route",
+      "new surface"
+    ],
+    "skip": ["no ui", "backend only", "server only", "api only"]
+  },
   "uiSurface": [
     "screen",
     "page",

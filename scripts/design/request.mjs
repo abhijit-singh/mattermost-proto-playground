@@ -15,6 +15,13 @@ import {
   saveRequest,
   writeText,
 } from './lib.mjs';
+import { gateTriage } from './gate.mjs';
+import {
+  printIdentity,
+  proveCheckout,
+  runStarter,
+  stopLine,
+} from './prove.mjs';
 import { readFullSource } from './source.mjs';
 import { triageText } from './triage.mjs';
 
@@ -89,7 +96,7 @@ export function buildRequest({ ref, text, flags }) {
     source_kind: kind,
     source_ref: ref,
     source_fetch: flags.fetch || (fs.existsSync(ref) ? 'local' : 'not-fetched'),
-    tier: triaged.tier,
+    tier: null,
     size: triaged.size,
     rounds_max: triaged.roundsMax,
     compliance: triaged.compliance,
@@ -100,10 +107,10 @@ export function buildRequest({ ref, text, flags }) {
     risk_flags: [],
     risk_score: 0,
     approval_required: 'pm-or-eng',
-    outcome_headline: asText(meta.outcome_headline || meta.outcome),
-    users: asText(meta.users),
-    customer_words: asText(meta.customer_words),
-    decider: asText(meta.decider),
+    outcome_headline: null,
+    users: null,
+    customer_words: null,
+    decider: flags.starter || null,
     lighthouse_name: asText(meta.lighthouse_name),
     verified: asText(meta.verified),
     needs_confirmation: [],
@@ -153,205 +160,54 @@ export function buildRequest({ ref, text, flags }) {
     budget_minutes: 90,
     inferred_fields: [],
     inference_unreliable: [],
+    signals: [],
+    designer_recommendation: null,
+    commit: flags.commit || null,
+    design_pass_version: flags.version || null,
   };
-  applyInference(request, text, meta, flags.proposal);
-  return { triaged, request };
-}
-
-function normalize(value) {
-  return String(value || '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
-
-function stripMark(value) {
-  return String(value || '')
-    .replace(/^\[INFERRED\]\s*/i, '')
-    .trim();
-}
-
-export function groundedIn(value, text) {
-  const needle = normalize(stripMark(value));
-  if (!needle) {
-    return false;
-  }
-  return normalize(text).includes(needle);
-}
-
-function labeledValue(text, label) {
-  const match = String(text).match(new RegExp(`^\\s*${label}:\\s*(.+)$`, 'im'));
-  if (!match) {
-    return '';
-  }
-  const value = match[1].trim();
-  if (!value || /^(null|~|unassigned)$/i.test(value)) {
-    return '';
-  }
-  return value;
-}
-
-function uniquePeople(text) {
-  const names = ['reporter', 'assignee', 'creator']
-    .map((label) => labeledValue(text, label))
-    .filter(Boolean);
-  return [...new Set(names)];
-}
-
-export function proposeFromSource(text, meta) {
-  const proposal = {
-    outcome_headline: null,
-    decider: null,
-    users: null,
-    customer_words: null,
-    outcome_inferred: false,
-    decider_inferred: false,
-    users_inferred: false,
-    customer_words_inferred: false,
-  };
-  if (!isBlank(meta.outcome_headline) || !isBlank(meta.outcome)) {
-    proposal.outcome_headline = asText(meta.outcome_headline || meta.outcome);
-  } else {
-    const expected = String(text).match(/\*{0,2}expected:\*{0,2}\s*(.+)/i);
-    const summary = labeledValue(text, 'summary');
-    const withoutFrontmatter = String(text).replace(
-      /^---\r?\n[\s\S]*?\r?\n---\r?\n?/,
-      '',
-    );
-    const heading = withoutFrontmatter.match(/^#\s+(.+)$/m);
-    const paragraph = withoutFrontmatter
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .find((line) => line && !line.startsWith('#'));
-    const candidate = expected
-      ? expected[1].trim()
-      : summary || (heading ? heading[1].trim() : paragraph || '');
-    if (candidate && groundedIn(candidate, text)) {
-      proposal.outcome_headline = candidate;
-      proposal.outcome_inferred = true;
-    }
-  }
-  if (!isBlank(meta.decider)) {
-    proposal.decider = asText(meta.decider);
-  } else {
-    const explicit = labeledValue(text, 'decider');
-    if (explicit && groundedIn(explicit, text)) {
-      proposal.decider = explicit;
-      proposal.decider_inferred = true;
-    } else {
-      const people = uniquePeople(text);
-      if (people.length === 1 && groundedIn(people[0], text)) {
-        proposal.decider = people[0];
-        proposal.decider_inferred = true;
-      }
-    }
-  }
-  if (!isBlank(meta.users)) {
-    proposal.users = asText(meta.users);
-  } else {
-    const users = labeledValue(text, 'users');
-    if (users && groundedIn(users, text)) {
-      proposal.users = users;
-      proposal.users_inferred = true;
-    }
-  }
-  if (!isBlank(meta.customer_words)) {
-    proposal.customer_words = asText(meta.customer_words);
-  } else {
-    const words = labeledValue(text, 'customer words');
-    const said = String(text).match(
-      /(?:customer|user)s?\s+said:\s*["“]([^"”]+)["”]/i,
-    );
-    const quote = words || (said ? said[1].trim() : '');
-    if (quote && groundedIn(quote, text)) {
-      proposal.customer_words = quote;
-      proposal.customer_words_inferred = true;
-    }
-  }
-  return proposal;
-}
-
-export function acceptProposal(proposal, text) {
-  const problems = [];
-  if (!proposal || !groundedIn(proposal.outcome_headline, text)) {
-    problems.push('outcome_headline');
-  }
-  if (!proposal || !groundedIn(proposal.decider, text)) {
-    problems.push('decider');
-  }
-  if (proposal && proposal.users && !groundedIn(proposal.users, text)) {
-    problems.push('users');
-  }
-  if (
-    proposal &&
-    proposal.customer_words &&
-    !groundedIn(proposal.customer_words, text)
-  ) {
-    problems.push('customer_words');
-  }
-  return problems;
-}
-
-function markInferred(request, field, value) {
-  request[field] = `[INFERRED] ${value}`;
-  request.inferred_fields.push(field);
-  request.needs_confirmation.push({
-    field,
-    value: request[field],
-    added_by: 'intake',
+  const gated = gateTriage({
+    text,
+    triage: flags.proposal,
+    overrides: { tier: flags.tier },
+    starter: request.decider || flags.starter,
   });
-}
-
-function applyProposal(request, proposal) {
-  const fields = [
-    ['outcome_headline', 'outcome_inferred'],
-    ['decider', 'decider_inferred'],
-    ['users', 'users_inferred'],
-    ['customer_words', 'customer_words_inferred'],
+  request.signals = gated.signals || [];
+  request.rules_fired = [
+    ...triaged.rulesFired,
+    ...(gated.signals || []).map(
+      (item) => `signal:${item.kind}:${item.tier}:${item.hits.join('+')}`,
+    ),
   ];
-  for (const [field, inferredFlag] of fields) {
-    if (isBlank(proposal[field])) {
-      continue;
-    }
-    if (proposal[inferredFlag]) {
-      markInferred(request, field, stripMark(proposal[field]));
-    } else if (isBlank(request[field])) {
-      request[field] = stripMark(proposal[field]);
-    }
-  }
-  const missing = ['outcome_headline', 'decider'].filter((field) =>
-    isBlank(request[field]),
-  );
-  request.inference_unreliable = missing;
-  if (missing.length > 0) {
+  if (!gated.ok) {
+    request.tier = gated.tier || null;
     request.stop = 'escalate';
-    request.stop_reason = `Cannot ground ${missing.join(', ')} in the source.`;
+    request.stop_reason = gated.stopReason;
+    return { triaged, request, gated };
   }
-}
-
-function applyInference(request, text, meta, proposal) {
-  if (!request.tier) {
-    return;
+  request.tier = gated.tier;
+  request.size = gated.size;
+  request.rounds_max = gated.roundsMax;
+  request.compliance = gated.compliance;
+  request.designer_recommendation = gated.designerRecommendation;
+  request.decider = gated.decider;
+  if (gated.outcome) {
+    request.outcome_headline = `[INFERRED] ${gated.outcome}`;
+    request.inferred_fields.push('outcome_headline');
+    request.needs_confirmation.push({
+      field: 'outcome_headline',
+      value: request.outcome_headline,
+      added_by: 'triage',
+    });
   }
-  const chosen = proposal || proposeFromSource(text, meta);
-  if (proposal && proposal.tier && proposal.tier !== request.tier) {
-    request.stop = 'escalate';
-    request.stop_reason = `Script rejected proposed tier ${proposal.tier}. The gate decided ${request.tier}.`;
-    return;
+  if (gated.users) {
+    request.users = `[INFERRED] ${gated.users}`;
+    request.inferred_fields.push('users');
   }
-  const problems = acceptProposal(chosen, text);
-  if (problems.length > 0) {
-    request.stop = 'escalate';
-    request.inference_unreliable = problems;
-    const invented = problems.filter(
-      (field) => field === 'users' || field === 'customer_words',
-    );
-    request.stop_reason = invented.length
-      ? `Script rejected ${invented.join(', ')}. Those values are not in the source.`
-      : `Cannot ground ${problems.join(', ')} in the source.`;
-    return;
+  if (gated.customerWords) {
+    request.customer_words = `[INFERRED] ${gated.customerWords}`;
+    request.inferred_fields.push('customer_words');
   }
-  applyProposal(request, chosen);
+  return { triaged, request, gated };
 }
 
 function parseFlags(argv) {
@@ -388,6 +244,7 @@ function parseFlags(argv) {
 }
 
 function main() {
+  const id = proveCheckout();
   const { flags, positionals } = parseFlags(process.argv.slice(2));
   const ref = positionals[0];
   if (!ref) {
@@ -395,16 +252,44 @@ function main() {
       'usage: npm run design:request -- <source> [--gated|--autopilot] [--tier X] [--size X] [--compliance on|off]',
     );
   }
+  flags.starter = runStarter();
+  flags.commit = id.sha;
+  flags.version = id.version;
   if (flags.proposalPath) {
-    flags.proposal = loadYaml(flags.proposalPath);
+    const proposalText = fs.readFileSync(flags.proposalPath, 'utf8');
+    flags.proposal = proposalText.trim().startsWith('{')
+      ? JSON.parse(proposalText)
+      : loadYaml(flags.proposalPath);
+  } else {
+    const guessed = kebab(flags.slug || path.basename(ref, path.extname(ref)));
+    const candidate = path.join(packetDir(guessed), 'triage.json');
+    if (fs.existsSync(candidate)) {
+      const proposalText = fs.readFileSync(candidate, 'utf8');
+      flags.proposal = proposalText.trim().startsWith('{')
+        ? JSON.parse(proposalText)
+        : loadYaml(candidate);
+    }
   }
   const read = readFullSource(ref, flags.sourceFile);
   if (read.fetch === 'unreadable') {
-    printResult({
-      source: ref,
-      stop: 'unreadable',
-      reason: 'The source was unreadable.',
-    });
+    console.log(
+      stopLine({
+        stop: 'escalate',
+        reason: 'The source was unreadable.',
+        sha: id.sha,
+      }),
+    );
+    process.exit(2);
+  }
+  if (!flags.proposal) {
+    console.log(
+      stopLine({
+        stop: 'escalate',
+        reason:
+          'triage.json is missing. The triage agent has not proposed. Keyword matches are signals and do not decide the tier.',
+        sha: id.sha,
+      }),
+    );
     process.exit(2);
   }
   flags.fetch = read.fetch;
@@ -440,11 +325,14 @@ function main() {
     request.slug,
     'intake',
     [
+      `commit: ${request.commit}`,
+      `design_pass_version: ${request.design_pass_version}`,
       `tier: ${request.tier}`,
       `size: ${request.size}`,
       `rounds_max: ${request.rounds_max}`,
       `compliance: ${request.compliance}`,
       `mode: ${request.mode}`,
+      `decider: ${request.decider}`,
       `rules: ${request.rules_fired.join('; ')}`,
       'Posted nothing. Wrote nothing outside this packet.',
     ].join('\n'),
@@ -452,7 +340,7 @@ function main() {
   if (request.tier === 'skip') {
     if (!request.stop) {
       request.stop = 'skip';
-      request.stop_reason = triaged.tierReason;
+      request.stop_reason = 'Tier is skip.';
       request.stage_frame = 'skipped';
       saveRequest(request.slug, request);
     }
@@ -478,6 +366,20 @@ function main() {
     missing_critical: criticalMissing.join(', '),
     rules: request.rules_fired.join('; '),
   });
+  if (request.stop) {
+    console.log(
+      stopLine({
+        stop: request.stop,
+        prs: 0,
+        targets: 'none',
+        reason: request.stop_reason,
+        sha: id.sha,
+      }),
+    );
+    if (request.stop === 'escalate') {
+      process.exit(2);
+    }
+  }
 }
 
 if (isMain()) {

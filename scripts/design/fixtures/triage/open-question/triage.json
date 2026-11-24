@@ -1,0 +1,28 @@
+{
+  "tier": {
+    "value": "explore",
+    "confidence": "high",
+    "evidence": ["How should we show the sharing panel?"]
+  },
+  "size": {
+    "value": "small",
+    "confidence": "high",
+    "evidence": ["sharing panel"]
+  },
+  "compliance": {
+    "value": false,
+    "confidence": "high",
+    "evidence": ["sharing panel"]
+  },
+  "outcome_headline": {
+    "value": "How should we show the sharing panel?",
+    "confidence": "high",
+    "evidence": ["How should we show the sharing panel?"]
+  },
+  "users": { "value": null, "confidence": "high", "evidence": [] },
+  "customer_words": { "value": null, "confidence": "high", "evidence": [] },
+  "designer_recommendation": {
+    "involve": true,
+    "reason": "An open question needs a designer before a direction is chosen."
+  }
+}

@@ -9,6 +9,12 @@ log() { printf '[cloud-agent-start] %s\n' "$*" >&2; }
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 
+# Design Pass checkouts prove the commit and refuse to start when this
+# checkout is behind its remote branch. Playground main has no prove script.
+if [ -f scripts/design/prove.mjs ]; then
+  node scripts/design/prove.mjs
+fi
+
 # Cloud-only instructions; .cursor/AGENTS.md is gitignored so local IDE runs never see it.
 if [ -f .cursor/cursor.md ]; then
   cp .cursor/cursor.md .cursor/AGENTS.md

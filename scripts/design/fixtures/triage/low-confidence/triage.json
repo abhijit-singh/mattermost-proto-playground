@@ -1,0 +1,28 @@
+{
+  "tier": {
+    "value": "tweak",
+    "confidence": "low",
+    "evidence": ["existing banner"]
+  },
+  "size": {
+    "value": "small",
+    "confidence": "high",
+    "evidence": ["existing banner"]
+  },
+  "compliance": {
+    "value": false,
+    "confidence": "high",
+    "evidence": ["banner"]
+  },
+  "outcome_headline": {
+    "value": "Add a warning on the existing banner.",
+    "confidence": "high",
+    "evidence": ["Add a warning on the existing banner."]
+  },
+  "users": { "value": null, "confidence": "high", "evidence": [] },
+  "customer_words": { "value": null, "confidence": "high", "evidence": [] },
+  "designer_recommendation": {
+    "involve": false,
+    "reason": "The change is a warning on an existing banner."
+  }
+}

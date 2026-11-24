@@ -1,0 +1,28 @@
+{
+  "tier": {
+    "value": "tweak",
+    "confidence": "high",
+    "evidence": ["attributes page"]
+  },
+  "size": {
+    "value": "small",
+    "confidence": "high",
+    "evidence": ["attributes page"]
+  },
+  "compliance": {
+    "value": true,
+    "confidence": "high",
+    "evidence": ["policy"]
+  },
+  "outcome_headline": {
+    "value": "Highlight it in the policy if it is using a deleted attribute",
+    "confidence": "high",
+    "evidence": ["Highlight it in the policy if it is using a deleted attribute"]
+  },
+  "users": { "value": null, "confidence": "high", "evidence": [] },
+  "customer_words": { "value": null, "confidence": "high", "evidence": [] },
+  "designer_recommendation": {
+    "involve": true,
+    "reason": "Compliance is on because the source mentions a policy."
+  }
+}

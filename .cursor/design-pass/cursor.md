@@ -4,7 +4,11 @@ This is the Design Pass environment. It is not the shared playground environment
 
 The orchestrator is this cloud agent's selected model, which is the default frontier model. Stage skills name the model for each stage. Frame, explore, and build run on Grok 4.7 High. Research, both critiques, persona, verify, handoff, and lookups run on Sonnet 5.5. Those are names. Do not invent a Cursor model slug, and do not ask anyone to paste a model id.
 
-Scripts decide the tier, the next step, the median score, the round count, and the checks. You design. A person approves the pull request.
+Fetch `origin` before any design step. `design:request` and `design:next` print `commit` and `design_pass_version` first and refuse to start when this checkout is behind its remote branch. Start a new agent for every run. Do not continue an agent that started before a push.
+
+The triage agent decides the tier from the whole source and writes `design/<slug>/triage.json`. The script checks that file. It does not decide the tier from keywords. The person who started the run is the decider, is not read from the ticket, and may assign the pull request to someone else. A designer recommendation is not a gate.
+
+Scripts decide the next step, the median score, the round count, and the checks. You design. A person approves the pull request.
 
 ## Write targets and research clones
 
@@ -28,7 +32,7 @@ Scripts decide the tier, the next step, the median score, the round count, and t
 - End with exactly one stop line and no text after it:
 
 ```text
-STOP <skip|gap|escalate|emit> | prs=<0|1> | targets=<none|playground> | reason=<one sentence>
+STOP <skip|gap|escalate|emit> | prs=<0|1> | targets=<none|playground> | sha=<commit> | reason=<one sentence>
 ```
 
 `prs=1` and `targets=playground` only when a prototype was built. Every other stop is `prs=0` and `targets=none`.

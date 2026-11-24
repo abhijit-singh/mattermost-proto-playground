@@ -47,9 +47,9 @@ Do not run \`compass-migrate\`. Do not run \`prototype-to-production\`.
 
 Record this stage with \`node scripts/design/stage.mjs <slug> start ${stage}\` and \`complete ${stage}\`. Do not edit another stage's block.
 
-Never draft outcome or the decider. If either is missing after intake, stop and name the field. Users and customer words are optional. Do not invent a customer quote. Include them only when the source contains them. In autopilot, draft any other missing human-only field as \`[AI DRAFT]\` and pass it with \`--set\` so it is listed under \`needs_confirmation\`. In gated mode, leave those other fields as \`GAP (owner)\`.
+Keep the outcome intake recorded. Do not replace it. Users and customer words are optional. Include them only when the source contains them. Do not invent a customer quote. The decider is the person who started the run. Do not read the decider from the ticket. In autopilot, draft any other missing human-only field as \`[AI DRAFT]\` and pass it with \`--set\` so it is listed under \`needs_confirmation\`. In gated mode, leave those other fields as \`GAP (owner)\`.
 
-A person is required only for an escalation, or when outcome or the decider cannot be grounded in the source.`;
+A person is required only for an escalation, or when the outcome cannot be grounded in the source.`;
 }
 
 const bodies = {
@@ -131,23 +131,17 @@ Answer the parent's question from this repo. You may read \`../compass-design\` 
 Do not run \`compass-migrate\` or \`prototype-to-production\`. ${modelInstruction('lookup')}`,
   triage: `${modelInstruction('triage')}
 
-You propose. The script accepts or stops. This applies to every ticket, issue, brief, and other source.
+You decide the tier. The script checks your file and accepts or stops. This is the same process for every ticket, issue, brief, and other source.
 
-Read the entire source before you propose. A Jira key is read with the Atlassian connection (summary, description, comments, reporter, assignee, and creator). A GitHub issue or pull request is read with \`gh\`, including the body and comments. Do not triage from the key or the title alone. If you cannot read the body, stop and say the source was unreadable. Do not invent ticket text.
+Read the whole source before you write. A Jira key is read with the Atlassian connection: title, description, acceptance criteria, comments, labels, the parent epic, and linked issues. A GitHub issue or pull request is read with \`gh\`, including the body and the comments. Do not decide from the key or the title alone. If the body cannot be read, stop and say the source was unreadable. Do not invent ticket text.
 
-Write the full text you read to a file, then write \`design/<slug>/triage-proposal.yaml\`:
+Write that full text to a file. Then write \`design/<slug>/triage.json\`. Each of tier, size, compliance, and outcome_headline has a value, a confidence (\`high\`, \`medium\`, or \`low\`), and at least one evidence quote copied word for word from the source. users and customer_words use the same shape, and their value is null when the source does not contain them. Do not invent a customer quote. Do not put a decider in this file. The script sets the decider to the person who started the run.
 
-\`\`\`yaml
-tier: <skip|tweak|explore|prototype>
-outcome_headline: '[INFERRED] phrase copied from the source'
-decider: '[INFERRED] name copied from the source'
-users:
-customer_words:
-\`\`\`
+Also write \`designer_recommendation\` with \`involve\` true or false and a \`reason\`. Use it when the risk looks like 2 or higher, or compliance is on. It is a recommendation, not a gate.
 
-Outcome and decider must be phrases that appear in that full text. Mark inferred values \`[INFERRED]\`. Leave users and customer_words empty unless the source actually contains them. Do not invent a customer quote. A named existing surface with a change on it, including warnings, indicators, and labels, is a tweak. Do not propose a tier when the tier phrases conflict.
+A named existing surface with a change on it, including warnings, indicators, and labels, is a tweak. Say \`low\` confidence when you are unsure. \`--tier\`, a \`design:*\` label, and a Seed \`ask:\` are overrides the script enforces.
 
-Then run \`npm run design:request -- <source> --source-file <full text> --proposal design/<slug>/triage-proposal.yaml\`. \`--tier\` remains an override the script enforces. Do not run \`compass-migrate\` or \`prototype-to-production\`.`,
+Do not run \`compass-migrate\` or \`prototype-to-production\`.`,
 };
 
 export function renderAgent(stage) {

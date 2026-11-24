@@ -16,6 +16,7 @@ import {
   selectPersonas,
   stageModel,
 } from './lib.mjs';
+import { proveCheckout, stopLine } from './prove.mjs';
 
 function isMain() {
   return (
@@ -566,11 +567,24 @@ function printStep(slug, step) {
 }
 
 function main() {
+  const id = proveCheckout();
   const slug = process.argv.slice(2).find((arg) => !arg.startsWith('--'));
   if (!slug) {
     die('usage: npm run design:next -- <slug>');
   }
-  printStep(slug, planNext(slug));
+  const step = planNext(slug);
+  printStep(slug, step);
+  if (step.stop) {
+    console.log(
+      stopLine({
+        stop: step.stop,
+        prs: step.prs || 0,
+        targets: step.targets || 'none',
+        reason: step.reason || step.stop_reason || '',
+        sha: id.sha,
+      }),
+    );
+  }
 }
 
 if (isMain()) {

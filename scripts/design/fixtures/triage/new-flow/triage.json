@@ -1,0 +1,28 @@
+{
+  "tier": {
+    "value": "prototype",
+    "confidence": "high",
+    "evidence": ["new flow"]
+  },
+  "size": {
+    "value": "large",
+    "confidence": "high",
+    "evidence": ["new flow"]
+  },
+  "compliance": {
+    "value": false,
+    "confidence": "high",
+    "evidence": ["bookmarks"]
+  },
+  "outcome_headline": {
+    "value": "Add a new screen and a new flow for bookmarks.",
+    "confidence": "high",
+    "evidence": ["Add a new screen and a new flow for bookmarks."]
+  },
+  "users": { "value": null, "confidence": "high", "evidence": [] },
+  "customer_words": { "value": null, "confidence": "high", "evidence": [] },
+  "designer_recommendation": {
+    "involve": true,
+    "reason": "A new flow needs a designer to review the new screen."
+  }
+}

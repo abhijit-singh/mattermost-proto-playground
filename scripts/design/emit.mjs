@@ -31,13 +31,18 @@ export function emitPacket(slug) {
       (item) => `- ${item.field}: ${item.value} (added_by: ${item.added_by})`,
     )
     .join('\n');
+  const designer = request.designer_recommendation;
+  const designerText = designer
+    ? `${designer.involve ? 'A designer should be involved' : 'A designer is not required'}. ${designer.reason} This is a recommendation, not a gate.`
+    : 'No designer recommendation was recorded.';
+  const approval = `Decider: ${request.decider}. The person who started this run is the decider and may assign the pull request to someone else.\n\n${designerText}\n`;
   writeText(
     path.join(dir, 'pr-body.md'),
-    `# ${request.title}\n\nTier: ${request.tier}\nSize: ${request.size}\nCompliance: ${request.compliance}\nChosen option: ${request.chosen_option || 'n/a'}\nChosen by: ${request.chosen_by || 'n/a'}\nRisk: ${request.risk_score} (${request.approval_required})\n\n## Needs confirmation\n\n${confirms || 'None.'}\n\nThis draft was not posted.\n`,
+    `# ${request.title}\n\nTier: ${request.tier}\nSize: ${request.size}\nCompliance: ${request.compliance}\nChosen option: ${request.chosen_option || 'n/a'}\nChosen by: ${request.chosen_by || 'n/a'}\nRisk: ${request.risk_score} (${request.approval_required})\n\n## Approval\n\n${approval}\n## Needs confirmation\n\n${confirms || 'None.'}\n\nThis draft was not posted.\n`,
   );
   writeText(
     path.join(dir, 'source-comment.md'),
-    `Design Pass drafted a ${request.tier} result for ${request.source_ref}.\n\nApproval required: ${request.approval_required}.\nThis comment was not posted.\n`,
+    `Design Pass prepared a ${request.tier} result for ${request.source_ref}.\n\n${approval}\nThis comment was not posted.\n`,
   );
   writeText(
     path.join(dir, 'seed-log.md'),
@@ -56,6 +61,8 @@ export function emitPacket(slug) {
     approval_required: request.approval_required,
     chosen_option: request.chosen_option,
     chosen_by: request.chosen_by,
+    decider: request.decider,
+    designer_recommendation: request.designer_recommendation || null,
     needs_confirmation: request.needs_confirmation || [],
   };
   writeText(

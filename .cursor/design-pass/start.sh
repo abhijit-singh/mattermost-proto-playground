@@ -9,6 +9,10 @@ log() { printf '[design-pass-start] %s\n' "$*" >&2; }
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 
+if [ -f scripts/design/prove.mjs ]; then
+  node scripts/design/prove.mjs
+fi
+
 bash .cursor/scripts/cloud-agent-start.sh
 
 if [ -f .cursor/design-pass/cursor.md ]; then

@@ -18,9 +18,9 @@ Do not run `compass-migrate`. Do not run `prototype-to-production`.
 
 Record this stage with `node scripts/design/stage.mjs <slug> start explore` and `complete explore`. Do not edit another stage's block.
 
-Never draft outcome or the decider. If either is missing after intake, stop and name the field. Users and customer words are optional. Do not invent a customer quote. Include them only when the source contains them. In autopilot, draft any other missing human-only field as `[AI DRAFT]` and pass it with `--set` so it is listed under `needs_confirmation`. In gated mode, leave those other fields as `GAP (owner)`.
+Keep the outcome intake recorded. Do not replace it. Users and customer words are optional. Include them only when the source contains them. Do not invent a customer quote. The decider is the person who started the run. Do not read the decider from the ticket. In autopilot, draft any other missing human-only field as `[AI DRAFT]` and pass it with `--set` so it is listed under `needs_confirmation`. In gated mode, leave those other fields as `GAP (owner)`.
 
-A person is required only for an escalation, or when outcome or the decider cannot be grounded in the source.
+A person is required only for an escalation, or when the outcome cannot be grounded in the source.
 
 Write `design/<slug>/options.md` from `design/templates/options.md`. Two or three options, differing in interaction model, not in styling. Each option has an `After-flow`, a precedent or a reason for novelty, a Compass component map, and the roadmap doors it opens or closes.
 

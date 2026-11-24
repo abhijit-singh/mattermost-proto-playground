@@ -22,7 +22,8 @@
     "design:next": "node scripts/design/next.mjs",
     "design:check": "node scripts/design/check.mjs",
     "design:emit": "node scripts/design/emit.mjs",
-    "design:sync-skills": "node scripts/design/sync-skills.mjs"
+    "design:sync-skills": "node scripts/design/sync-skills.mjs",
+    "design:test-triage": "node scripts/design/test-triage.mjs"
   },
   "dependencies": {
     "@fontsource/metropolis": "^5.2.5",

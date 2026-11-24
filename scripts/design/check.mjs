@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertSkillsInSync } from './sync-skills.mjs';
+import { wordingHits } from './wording.mjs';
 import {
   CRITICAL_FIELDS,
   DRAFTABLE_FIELDS,
@@ -84,10 +85,14 @@ export function checkPacket(slug) {
     failures.push(error.message);
   }
 
-  for (const field of CRITICAL_FIELDS) {
+  const required = request.tier === 'skip' ? ['decider'] : CRITICAL_FIELDS;
+  for (const field of required) {
     if (isBlank(request[field]) || isDraft(request[field])) {
-      failures.push(`${field} is missing. It is not drafted.`);
+      failures.push(`${field} is missing.`);
     }
+  }
+  for (const hit of wordingHits()) {
+    failures.push(`old intake wording: ${hit}`);
   }
   if (request.mode === 'autopilot') {
     for (const field of DRAFTABLE_FIELDS) {
