@@ -1,0 +1,42 @@
+.attribute-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  &__caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &__head,
+  &__cell {
+    padding: var(--spacing-m) var(--spacing-l);
+    border-bottom: 1px solid rgba(var(--center-channel-color-rgb), var(--opacity-8));
+    text-align: start;
+    vertical-align: top;
+  }
+
+  &__head {
+    color: rgba(var(--center-channel-color-rgb), var(--opacity-72));
+    font-size: var(--font-size-75);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-75);
+  }
+
+  &__name {
+    font-weight: var(--font-weight-semibold);
+    overflow-wrap: anywhere;
+  }
+
+  &__actions {
+    width: 1%;
+    text-align: end;
+    white-space: nowrap;
+  }
+}

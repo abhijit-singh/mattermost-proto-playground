@@ -1,0 +1,56 @@
+.system-console {
+  display: flex;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  background: var(--center-channel-bg);
+  color: var(--center-channel-color);
+
+  &__sidebar {
+    display: flex;
+    flex: 0 0 auto;
+    align-self: stretch;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--sidebar-bg);
+  }
+
+  &__main {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: var(--center-channel-bg);
+  }
+
+  &__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__scroll {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-xxl) var(--spacing-xxxl) var(--spacing-xxxxl);
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: rgba(var(--center-channel-color-rgb), var(--opacity-72));
+    font-size: var(--font-size-100);
+    line-height: var(--line-height-100);
+  }
+}

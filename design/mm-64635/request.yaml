@@ -1,0 +1,135 @@
+slug: mm-64635
+title: mm-64635
+source_kind: issue
+source_ref: "https://mattermost.atlassian.net/browse/MM-64635"
+source_fetch: source-file
+tier: tweak
+size: small
+rounds_max: 2
+compliance: true
+mode: autopilot
+rules_fired:
+  - "tweak: "surface-change:page+channel+warnings+indicators+labels\""
+  - "size-small: "default\""
+  - "compliance: "labels+policy\""
+  - "signal: "surface:tweak:page+channel+warnings+indicators+labels\""
+size_signals:
+  novelty: unknown
+  interaction_depth: unknown
+  prior_art: unknown
+prototype: scenes
+risk_flags:
+  - permissions_or_security_copy
+  - destructive_action
+  - admin_console
+risk_score: 4
+approval_required: designer
+outcome_headline: "[INFERRED] Highlight it in the policy if it is using a deleted attribute"
+users: null
+customer_words: null
+decider: Cursor Agent
+lighthouse_name: "[AI DRAFT] none named in MM-64635"
+verified: "[AI DRAFT] not verified"
+needs_confirmation:
+  - field: outcome_headline
+    value: "[INFERRED] Highlight it in the policy if it is using a deleted attribute"
+    added_by: triage
+  - field: lighthouse_name
+    value: "[AI DRAFT] none named in MM-64635"
+    added_by: frame
+  - field: verified
+    value: "[AI DRAFT] not verified"
+    added_by: frame
+stage_frame: complete
+stage_research: complete
+stage_explore: pending
+stage_critique_options: pending
+stage_build: complete
+stage_critique: complete
+stage_persona: complete
+stage_verify: complete
+stage_handoff: complete
+stage_check: pending
+frame_invalidations: 0
+research_invalidates_frame: false
+research_invalidation_applied: false
+options_round: 0
+options_phase: explore
+options_decision: null
+options_applied: false
+refine_used: false
+refine_option: null
+back_edge_research: false
+back_edge_frame: false
+late_back_edge: false
+recommended_option: null
+chosen_option: null
+chosen_by: null
+eligible_options: []
+fallback_options: []
+explorer_pick: null
+build_round: 2
+verify_round: 1
+verify_repairs: 0
+verify_repair_open: false
+last_verdict: pass
+last_scores:
+  1: 4
+  2: 4
+  3: 4
+  4: 4
+  5: 4
+  6: 4
+  7: 4
+  8: 4
+  9: 4
+  10: 4
+previous_scores:
+  1: 4
+  2: 3
+  3: 3
+  4: 4
+  5: 4
+  6: 4
+  7: 4
+  8: 4
+  9: 4
+  10: 4
+previous_blockers: 0
+regression_pending: false
+check_ok: true
+check_ran: true
+stop: emit
+stop_reason: Drafts are in the packet. Open one playground pull request. Do not post the source comment or the Seed.
+prs: 1
+started_at: "2026-11-24T17:30:22Z"
+budget_minutes: 90
+inferred_fields:
+  - outcome_headline
+inference_unreliable: []
+signals:
+  - kind: surface
+    tier: tweak
+    hits:
+      - page
+      - channel
+      - warnings
+      - indicators
+      - labels
+designer_recommendation:
+  involve: true
+  reason: "Compliance is on (policy-based access control), and the ticket carries the needs-ux label. The ticket gives no visual treatment for the highlight and links a Figma file for the System Console layout. A designer should confirm how a deleted attribute reads inside a policy."
+commit: 464b8028527db1d503280489469444767fb3fb9f
+design_pass_version: 2026-11-24.3
+last_verify_scores:
+  1: 4
+  2: 4
+  3: 4
+  4: 4
+  5: 4
+  6: 4
+  7: 4
+  8: 4
+  9: 4
+  10: 4
+last_verify_pass: true

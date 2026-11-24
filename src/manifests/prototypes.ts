@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import ExternalCallParticipants from '@/pages/prototypes/external-call-participants/ExternalCallParticipants';
+import Mm64635 from '@/pages/prototypes/mm-64635/Mm64635';
 import MobileHomeChannel from '@/pages/prototypes/mobile-home-channel/MobileHomeChannel';
 import OutboundCalls from '@/pages/prototypes/outbound-calls/OutboundCalls';
 import VideoCalls from '@/pages/prototypes/video-calls/VideoCalls';
@@ -17,6 +18,12 @@ export const PROTOTYPES: PrototypeEntry[] = [
     label: 'External Call Participants',
     path: '/prototypes/external-call-participants',
     component: ExternalCallParticipants,
+  },
+  {
+    id: 'mm-64635',
+    label: 'Deleted attribute warnings',
+    path: '/prototypes/mm-64635',
+    component: Mm64635,
   },
   {
     id: 'mobile-home-channel',

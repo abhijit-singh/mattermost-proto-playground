@@ -1,0 +1,48 @@
+{
+  "tier": {
+    "value": "tweak",
+    "confidence": "high",
+    "evidence": [
+      "Add warnings and indicators if a policy is using deleted attributes",
+      "Expected: Highlight it in the policy if it is using a deleted attribute",
+      "the attribute is deleted from the attributes page"
+    ]
+  },
+  "size": {
+    "value": "small",
+    "confidence": "medium",
+    "evidence": [
+      "Add warnings and indicators if a policy is using deleted attributes",
+      "Expected: Highlight it in the policy if it is using a deleted attribute"
+    ]
+  },
+  "compliance": {
+    "value": true,
+    "confidence": "high",
+    "evidence": [
+      "Add warnings and indicators if a policy is using deleted attributes",
+      "define very fine-grained access rules for users to access sensitive channels"
+    ]
+  },
+  "outcome_headline": {
+    "value": "Highlight it in the policy if it is using a deleted attribute",
+    "confidence": "high",
+    "evidence": [
+      "Expected: Highlight it in the policy if it is using a deleted attribute"
+    ]
+  },
+  "users": {
+    "value": null,
+    "confidence": "high",
+    "evidence": []
+  },
+  "customer_words": {
+    "value": null,
+    "confidence": "high",
+    "evidence": []
+  },
+  "designer_recommendation": {
+    "involve": true,
+    "reason": "Compliance is on (policy-based access control), and the ticket carries the needs-ux label. The ticket gives no visual treatment for the highlight and links a Figma file for the System Console layout. A designer should confirm how a deleted attribute reads inside a policy."
+  }
+}

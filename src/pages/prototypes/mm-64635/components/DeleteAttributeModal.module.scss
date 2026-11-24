@@ -1,0 +1,9 @@
+.delete-attribute-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+
+  &__text {
+    margin: 0;
+  }
+}
