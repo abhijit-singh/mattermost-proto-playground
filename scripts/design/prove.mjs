@@ -1,4 +1,6 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
 import { repoRoot } from './lib.mjs';
 import versionFile from './version.json' with { type: 'json' };
 
@@ -55,11 +57,21 @@ export function runStarter() {
   return 'the person who started this run';
 }
 
+function versionOnDisk() {
+  return JSON.parse(
+    fs.readFileSync(path.join(repoRoot, 'scripts/design/version.json'), 'utf8'),
+  ).design_pass_version;
+}
+
+function refuse(id, reason) {
+  console.error(stopLine({ stop: 'escalate', reason, sha: id.sha }));
+  process.exit(2);
+}
+
 export function proveCheckout() {
   const id = printIdentity();
-  let fetched = '';
   try {
-    fetched = execFileSync('git', ['fetch', 'origin'], {
+    execFileSync('git', ['fetch', 'origin'], {
       cwd: repoRoot,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -67,15 +79,10 @@ export function proveCheckout() {
   } catch (error) {
     const detail = error.stderr || error.message || 'git fetch failed';
     console.error(
-      stopLine({
-        stop: 'escalate',
-        reason: `Refusing to start. Could not fetch origin, so this checkout cannot prove it is current. ${String(detail).split('\n')[0]}`,
-        sha: id.sha,
-      }),
+      `Could not fetch origin. Continuing at ${id.sha}. ${String(detail).split('\n')[0]}`,
     );
-    process.exit(2);
+    return id;
   }
-  void fetched;
   const branch = git(['rev-parse', '--abbrev-ref', 'HEAD']);
   if (branch === 'HEAD') {
     return id;
@@ -92,16 +99,44 @@ export function proveCheckout() {
     '--count',
     `HEAD...${remote}`,
   ]);
-  const behind = Number(counts.split(/\s+/)[1] || 0);
-  if (behind > 0) {
-    console.error(
-      stopLine({
-        stop: 'escalate',
-        reason: `Refusing to start. Checkout ${id.sha} is ${behind} commit(s) behind ${remote}. Start a new agent on the updated branch. Do not continue this one.`,
-        sha: id.sha,
-      }),
+  const [ahead, behind] = counts.split(/\s+/).map((part) => Number(part || 0));
+  const dirty = git(['status', '--porcelain']);
+  if (dirty) {
+    refuse(id, `Refusing to start. Checkout ${id.sha} is dirty.`);
+  }
+  if (ahead > 0 && behind > 0) {
+    refuse(
+      id,
+      `Refusing to start. Checkout ${id.sha} has diverged from ${remote}.`,
     );
-    process.exit(2);
+  }
+  if (behind > 0) {
+    try {
+      execFileSync('git', ['pull', '--ff-only', 'origin', branch], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    } catch (error) {
+      const detail = error.stderr || error.message || 'git pull failed';
+      refuse(
+        id,
+        `Refusing to start. Fast-forward of ${id.sha} failed. ${String(detail).split('\n')[0]}`,
+      );
+    }
+    const next = { sha: headSha(), version: versionOnDisk() };
+    console.log(`commit: ${id.sha}`);
+    console.log(`commit: ${next.sha}`);
+    console.log(`design_pass_version: ${next.version}`);
+    if (process.argv[1] && !process.argv[1].endsWith('prove.mjs')) {
+      const result = spawnSync(process.execPath, process.argv.slice(1), {
+        cwd: repoRoot,
+        stdio: 'inherit',
+        env: process.env,
+      });
+      process.exit(result.status ?? 1);
+    }
+    return next;
   }
   return id;
 }

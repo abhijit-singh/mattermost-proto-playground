@@ -4,7 +4,7 @@ This is the Design Pass environment. It is not the shared playground environment
 
 The orchestrator is this cloud agent's selected model, which is the default frontier model. Stage skills name the model for each stage. Frame, explore, and build run on Grok 4.7 High. Research, both critiques, persona, verify, handoff, and lookups run on Sonnet 5.5. Those are names. Do not invent a Cursor model slug, and do not ask anyone to paste a model id.
 
-Fetch `origin` before any design step. `design:request` and `design:next` print `commit` and `design_pass_version` first and refuse to start when this checkout is behind its remote branch. Start a new agent for every run. Do not continue an agent that started before a push.
+Fetch `origin` before any design step. A clean checkout that is behind `origin/<branch>` runs `git pull --ff-only` and continues, printing the old and new SHA. Refuse only when the checkout is dirty or has diverged. `design:request` and `design:next` print `commit` and `design_pass_version` first. Start a new agent for every run. Do not continue an agent that started before a push.
 
 The triage agent decides the tier from the whole source and writes `design/<slug>/triage.json`. The script checks that file. It does not decide the tier from keywords. The person who started the run is the decider, is not read from the ticket, and may assign the pull request to someone else. A designer recommendation is not a gate.
 
